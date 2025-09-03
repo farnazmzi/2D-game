@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fa">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shapes Collision & Rotation</title>
+  <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+  <div id="hud"></div>
+  <div class="btn-container">
+    <button id="toggleDebug">Toggle Debug</button>
+    <button id="toggleLive">Settings</button>
+    <button id="toggleCollider">Colliders</button>
+  </div>
+
+  <pre id="debug" style="position:fixed; right:12px; top:12px; 
+            background:#222; 
+            color:#0f0; 
+            padding:8px; 
+            border-radius:8px; 
+            width:250px; 
+            display:none; 
+              background: rgba(51, 51, 51, 0.5); 
+">
+Debug info here
+</pre>
+
+  <!-- پنل شروع بازی وسط صفحه -->
+  <div id="controlPanel">
+    <button id="closeControlPanel" class="close-btn">×</button>
+
+    <h3>Game Settings</h3>
+
+    <div class="controlRow">
+      <label>Circle Radius: <span id="circleRadiusValStart"></span></label>
+      <input type="range" id="circleRadiusSliderStart" min="10" max="100">
+    </div>
+
+    <div class="controlRow">
+      <label>Square Size: <span id="squareSizeValStart"></span></label>
+      <input type="range" id="squareSizeSliderStart" min="20" max="150">
+    </div>
+
+    <div class="controlRow">
+      <label>Star Radius: <span id="starRadiusValStart"></span></label>
+      <input type="range" id="starRadiusSliderStart" min="10" max="100">
+    </div>
+
+    <div class="controlRow">
+      <label>Max Shapes: <span id="maxShapesValStart"></span></label>
+      <input type="range" id="maxShapesSliderStart" min="1" max="50" value="12">
+    </div>
+
+    <div class="controlRow">
+      <label>Speed: <span id="speedValStart"></span></label>
+      <input type="range" id="speedSliderStart" min="10" max="200" value="60">
+    </div>
+
+    <div class="controlRow">
+      <label>RoundTime: <span id="roundTimeValStart"></span></label>
+      <input type="range" id="roundTimeSliderStart" min="5" max="120" value="40">
+    </div>
+
+    <div class="controlRow">
+      <label>Bounces: <span id="maxWallBouncesValStart"></span></label>
+      <input type="range" id="maxWallBouncesSliderStart" min="1" max="10" value="3">
+    </div>
+  </div>
+
+  <button id="startGameBtn" class="control-btn">Start Game</button>
+
+
+  <canvas id="myCanvas"></canvas>
+
+
+  <!-- Planck.js -->
+  <script src="svgmaker.js"></script>
+  <script src="planck.js"></script>
+  <script src="wall.js"></script>
+  <script src="main.js"></script>
+    <script src="dragdebug.js"></script>
+    <script src="shapes.js"></script>
+
+  <!-- <script src="dragdebug.js"></script> -->
+
+
+
+
+</body>
+
+</html>
