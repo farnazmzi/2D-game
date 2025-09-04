@@ -26,31 +26,48 @@
       padding: 8px 10px;
       border-radius: 8px;
     }
+#buttonContainercenter {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column; /* زیر هم قرار گرفتن دکمه‌ها */
+  align-items: center;
+  gap: 16px; /* فاصله عمودی بین دکمه‌ها */
+  z-index: 999;
+}
 
     .control-btn {
-      position: fixed;
-      padding: 16px 32px;
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      font-size: 18px;
-      font-weight: 600;
-      box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
-      transition: background 0.2s, transform 0.1s;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 246px;
+  padding: 16px 32px;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 600;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+  transition: background 0.2s, transform 0.1s;
+  width: 246px;
     }
 
     #startGameBtn {
-      top: 45%;
+
       background-color: #28a745;
     }
 
+
     #startGameBtn:hover {
       background-color: #218838;
-      transform: translateX(-50%) translateY(-2px);
+      transform: translateX(-5%) ;
+    }
+    #toggleLive {
+      background-color: #6c757d;
+    }
+
+    #toggleLive:hover {
+      background-color: #5a6268;
+      transform: translateX(5%) ;
     }
 
     .btn-container {
@@ -68,8 +85,7 @@
     }
 
     /* استایل دکمه‌ها */
-    #toggleDebug,
-    #toggleLive {
+    #toggleDebug {
       padding: 12px 18px;
       color: white;
       border: none;
@@ -89,14 +105,7 @@
       transform: translateY(-2px);
     }
 
-    #toggleLive {
-      background-color: #6c757d;
-    }
 
-    #toggleLive:hover {
-      background-color: #5a6268;
-      transform: translateY(-2px);
-    }
 
 
     #controlPanel {

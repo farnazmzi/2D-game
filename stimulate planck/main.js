@@ -27,7 +27,6 @@ window.maxWallBounces = 5;
 
 
 
-
 function resize() 
 { canvas.width = window.innerWidth;
    canvas.height = window.innerHeight;

@@ -16,7 +16,6 @@
   <div id="hud"></div>
   <div class="btn-container">
     <button id="toggleDebug">Toggle Debug</button>
-    <button id="toggleLive">Settings</button>
     <button id="toggleCollider">Colliders</button>
   </div>
 
@@ -45,31 +44,35 @@ Debug info here
 
     <div class="controlRow">
       <label>Max Shapes: <span id="maxShapesValStart"></span></label>
-      <input type="range" id="maxShapesSliderStart" min="1" max="50" value="12">
+      <input type="range" id="maxShapesSliderStart" min="1" max="50" >
     </div>
 
     <div class="controlRow">
       <label>Speed: <span id="speedValStart"></span></label>
-      <input type="range" id="speedSliderStart" min="10" max="200" value="60">
+      <input type="range" id="speedSliderStart" min="1" max="70" >
     </div>
 
     <div class="controlRow">
       <label>RoundTime: <span id="roundTimeValStart"></span></label>
-      <input type="range" id="roundTimeSliderStart" min="5" max="120" value="40">
+      <input type="range" id="roundTimeSliderStart" min="5" max="120" >
     </div>
 
     <div class="controlRow">
       <label>Bounces: <span id="maxWallBouncesValStart"></span></label>
-      <input type="range" id="maxWallBouncesSliderStart" min="1" max="10" value="3">
+      <input type="range" id="maxWallBouncesSliderStart" min="1" max="10" >
     </div>
   </div>
 
+<div id="buttonContainercenter">
   <button id="startGameBtn" class="control-btn">Start Game</button>
+  <button id="toggleLive" class="control-btn">Settings</button>
+</div>
 
 
   <canvas id="canvas"></canvas>
   <div id="hud"></div>
       <script src="matter.js"></script>
+      <script src="poly-decomp.js"></script>
         <script src="svgmaker.js"></script>
 
   <script src="main.js"></script>
