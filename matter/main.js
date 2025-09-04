@@ -19,8 +19,7 @@ window.roundTime =20;
 
 let lastRoundTime = performance.now() / 1000;
 
-
-let wallsActive = false;
+let wallActive = false; 
 const BORDER = 7;
 let wallsStartTime = null; // زمان فعال شدن دیوارها
 const WALL_BLOCK_DURATION = 50; // ثانیه
@@ -31,7 +30,7 @@ let showColliders = false;
 window.maxWallBounces = 5;
 window.shapeSize = 100;
 
-window.SPEED = window.SPEED ?? 70;          // سرعت قابل تنظیم
+window.SPEED = window.SPEED ?? 1;          // سرعت قابل تنظیم
 window.REGEN_INTERVAL = window.REGEN_INTERVAL ?? 50; // ثانیه
 window.MAX_SHAPES = window.MAX_SHAPES ?? 20;
 
@@ -287,32 +286,9 @@ const star = new SvgStar(x, y, {
     true // اجازه decomposition خودکار برای شکل‌های پیچیده
   );
 
+  star.body.svgStar = star;
   Matter.World.add(world, star.body);
   // -----------------------------
-
-  // (2) مقصد امن (مرکز ± مقداری) را انتخاب کن
-  // const cx = canvas.width / 2 + (Math.random() - 0.5) * 200;
-  // const cy = canvas.height / 2 + (Math.random() - 0.5) * 200;
-
-  // (3) جهت و سرعت ثابت بر اساس window.SPEED
-  // const dx = cx - x;
-  // const dy = cy - y;
-  // const dist = Math.hypot(dx, dy) || 1;
-  // const speed = window.SPEED || 1;
-  // const vx = (dx / dist) * speed;
-  // const vy = (dy / dist) * speed;
-
-  // (4) مقداردهی به ستاره
-  // star.vx = vx;
-  // star.vy = vy;
-  // star.initialPos = { x, y };
-
-  // if (star.body) {
-  //   // اعمال سرعت اولیه به body
-  //   Matter.Body.setVelocity(star.body, { x: vx, y: vy });
-  // }
-
-  // (5) اضافه کردن به آرایه
   shapes.push(star);
   totalShapes++;
   remainedShapes++;
@@ -379,6 +355,7 @@ function removeShape(shape) {
 
 
 
+
 function loop(now) {
   if (!started) return;
 
@@ -430,6 +407,7 @@ if (bounced) {
   s.draw(ctx, pos.x, pos.y, angle);
 }
 
+  if (wallActive) drawWalls();
   // حذف شکل‌هایی که خارج میشن
   for (let i = shapes.length - 1; i >= 0; i--) {
     if (shapes[i].remove) {
