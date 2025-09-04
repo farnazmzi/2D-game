@@ -545,7 +545,9 @@
         AABB2.extend(this, value);
         return this;
       };
+      var BORDER_EXTEND = 0.007;
       AABB2.extend = function(out, value) {
+        value += BORDER_EXTEND; 
         out.lowerBound.x -= value;
         out.lowerBound.y -= value;
         out.upperBound.x += value;
@@ -761,7 +763,7 @@
       });
       Object.defineProperty(SettingsInternal2, "polygonRadius", {
         get: function() {
-          return 2 * Settings.linearSlop;
+          return 2 * Settings.linearSlop + 0.1;
         },
         enumerable: false,
         configurable: true
@@ -7324,13 +7326,14 @@
         _this.m_type = CircleShape2.TYPE;
         _this.m_p = Vec2.zero();
         _this.m_radius = 1;
+          var BORDER_EXTEND = 0.5;
         if (typeof a2 === "object" && Vec2.isValid(a2)) {
           _this.m_p.setVec2(a2);
           if (typeof b2 === "number") {
-            _this.m_radius = b2;
+            _this.m_radius = b2 ;
           }
         } else if (typeof a2 === "number") {
-          _this.m_radius = a2;
+          _this.m_radius = a2 ;
         }
         return _this;
       }
@@ -7338,7 +7341,7 @@
         return {
           type: this.m_type,
           p: this.m_p,
-          radius: this.m_radius
+          radius: this.m_radius +BORDER_EXTEND
         };
       };
       CircleShape2._deserialize = function(data) {
@@ -7350,7 +7353,7 @@
         return this.m_type;
       };
       CircleShape2.prototype.getRadius = function() {
-        return this.m_radius;
+        return this.m_radius + BORDER_EXTEND;
       };
       CircleShape2.prototype.getCenter = function() {
         return this.m_p;
@@ -7358,7 +7361,7 @@
       CircleShape2.prototype._clone = function() {
         var clone = new CircleShape2();
         clone.m_type = this.m_type;
-        clone.m_radius = this.m_radius;
+        clone.m_radius = this.m_radius +BORDER_EXTEND;
         clone.m_p = this.m_p.clone();
         return clone;
       };
@@ -7367,7 +7370,7 @@
       };
       CircleShape2.prototype.testPoint = function(xf2, p) {
         var center2 = transformVec2(temp, xf2, this.m_p);
-        return distSqrVec2(p, center2) <= this.m_radius * this.m_radius;
+        return distSqrVec2(p, center2) <= this.m_radius * this.m_radius +BORDER_EXTEND ;
       };
       CircleShape2.prototype.rayCast = function(output2, input2, xf2, childIndex) {
         var position = Vec2.add(xf2.p, Rot.mulVec2(xf2.q, this.m_p));
@@ -7392,8 +7395,9 @@
       };
       CircleShape2.prototype.computeAABB = function(aabb, xf2, childIndex) {
         var p = transformVec2(temp, xf2, this.m_p);
-        setVec2(aabb.lowerBound, p.x - this.m_radius, p.y - this.m_radius);
-        setVec2(aabb.upperBound, p.x + this.m_radius, p.y + this.m_radius);
+         var extra = 0.5; 
+        setVec2(aabb.lowerBound, p.x - this.m_radius, p.y - this.m_radius +extra);
+        setVec2(aabb.upperBound, p.x + this.m_radius, p.y + this.m_radius +extra);
       };
       CircleShape2.prototype.computeMass = function(massData, density) {
         massData.mass = density * math_PI$4 * this.m_radius * this.m_radius;

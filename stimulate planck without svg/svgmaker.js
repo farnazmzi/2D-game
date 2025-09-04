@@ -72,8 +72,7 @@
             return {
                 svg: svgWrap(`<circle cx="50" cy="50" r="${radius}" />`, { stroke, fill, strokeLocal }),
                 collider: { type: 'circle', r: radius },
-                strokeLocal,
-                shapeType: 'circle'
+                strokeLocal
             };
         }
 
@@ -87,8 +86,7 @@
             return {
                 svg: svgWrap(`<polygon points="${pointsStr}" />`, { stroke, fill, strokeLocal }),
                 collider: { type: 'poly', pts },
-                strokeLocal,
-                shapeType: 'Poly'
+                strokeLocal
             };
         }
 
@@ -97,46 +95,28 @@
         mkDiamond(opts = {}) { return this.mkPolyFromPoints(`50,5 95,50 50,95 5,50`, opts); }
         mkRectangle(opts = {}) { return this.mkPolyFromPoints(`6,28 94,28 94,72 6,72`, opts); }
 
-        // mkRegularPolygon(n = 5, opts = {}) {
-        //     const { radius = 45, rotationDeg = -90 } = opts;
-        //     const cx = 50, cy = 50, rot = rotationDeg * Math.PI / 180;
-        //     const pts = [];
-        //     for (let i = 0; i < n; i++) {
-        //         const a = rot + i * 2 * Math.PI / n;
-        //         pts.push([cx + radius * Math.cos(a), cy + radius * Math.sin(a)].map(v => +v.toFixed(3)).join(","));
-        //     }
-        //     return this.mkPolyFromPoints(pts.join(" "), opts);
-        // }
-  mkRegularPolygon(n = 5, opts = {}) {
-    const { radius = 45, rotationDeg = 0, stroke = '#ff0000', fill = '#ffffff', outlinePx = 12, size = 96 } = opts;
-    const cx = 50, cy = 50, rot = rotationDeg * Math.PI / 180;
-    const pts = [];
-    for (let i = 0; i < n; i++) {
-        const a = rot + i * 2 * Math.PI / n;
-        pts.push([cx + radius * Math.cos(a), cy + radius * Math.sin(a)].map(v => +v.toFixed(3)).join(","));
-    }
-
-    const strokeLocal = computeStrokeLocal(size, outlinePx);
-
-    return {
-        svg: svgWrap(`<polygon points="${pts.join(" ")}" />`, { stroke, fill, strokeLocal }),
-        collider: { type: 'poly', pts },
-        strokeLocal,
-        shapeType: 'RegularPolygon' 
-    };
-}
+        mkRegularPolygon(n = 5, opts = {}) {
+            const { radius = 45, rotationDeg = -90 } = opts;
+            const cx = 50, cy = 50, rot = rotationDeg * Math.PI / 180;
+            const pts = [];
+            for (let i = 0; i < n; i++) {
+                const a = rot + i * 2 * Math.PI / n;
+                pts.push([cx + radius * Math.cos(a), cy + radius * Math.sin(a)].map(v => +v.toFixed(3)).join(","));
+            }
+            return this.mkPolyFromPoints(pts.join(" "), opts);
+        }
 
         mkStar5(opts = {}) {
             const { stroke = '#ff0000', fill = '#ffffff', outlinePx = 12, size = 96 } = opts;
             const strokeLocal = computeStrokeLocal(size, outlinePx);
-            const cx = 50, cy = 50, outer = 45, inner = 18, rot = 0 * Math.PI / 180, pts = [];
+            const cx = 50, cy = 50, outer = 45, inner = 18, rot = -90 * Math.PI / 180, pts = [];
             for (let i = 0; i < 10; i++) {
                 const rr = (i % 2 === 0) ? outer : inner; const a = rot + i * Math.PI / 5;
                 pts.push([cx + rr * Math.cos(a), cy + rr * Math.sin(a)].map(v => +v.toFixed(3)).join(","));
             }
             const starSvg = svgWrap(`<polygon points="${pts.join(" ")}" />`, { stroke, fill, strokeLocal });
             const hull = this.mkRegularPolygon(5, opts).collider; // convex hull for stability
-            return { svg: starSvg, collider: hull, strokeLocal, shapeType: 'star' };
+            return { svg: starSvg, collider: hull, strokeLocal };
         }
 
         // ---- Glyphs (digits/letters): rectangles + filter border, compound rect colliders

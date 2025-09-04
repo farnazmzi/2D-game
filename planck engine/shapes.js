@@ -60,21 +60,18 @@ function createCircle(x, y, r = window.size, color = randomColor(), border = 7) 
 }
 
 
-
-function createBox(x, y, w = window.width, h = window.height, color = randomColor(), strokeWidth = 7) {
+function createBox(x, y, w = 80, h = 80, color = randomColor(), strokeWidth = 7) {
   const body = world.createDynamicBody(pl.Vec2(x / SCALE, y / SCALE));
 
-  // ابعاد واقعی برای فیزیک = ابعاد + نصف ضخامت بوردر
-  const physicsW = (w + strokeWidth +20) / 2 / SCALE;
-  const physicsH = (h + strokeWidth +20) / 2 / SCALE;
-
-  body.createFixture(pl.Box(physicsW, physicsH), { density: 1, restitution: 0.8 });
+  // فقط یک مستطیل ساده (که در اینجا مربع هم میشه اگر w=h بدی)
+  body.createFixture(pl.Box(w / 2 / SCALE, h / 2 / SCALE), {
+    density: 1,
+    restitution: 0.5
+  });
 
   body.renderColor = color;
   body.border = strokeWidth;
   body.strokeColor = "#fff";
-  body.fixtureWidth = physicsW  * 2 * SCALE;  // برای برخورد با دیوار یا محاسبات
-  body.fixtureHeight = physicsH * 2 * SCALE;
 
   return body;
 }
@@ -569,11 +566,11 @@ function tryGenerateShape() {
         typeName = "hexagon";
         break;
     }
-    // case 3: { // ستاره
-    //     body = createStar(sx, sy, 5, r, r*0.5, color);
-    //     typeName = "star";
-    //     break;
-    // }
+    case 3: { // ستاره
+        body = createStar(sx, sy, 5, r, r*0.5, color);
+        typeName = "star";
+        break;
+    }
     case 5: { // چندضلعی 6 ضلعی
         const sides = 6;
         const verts = [];

@@ -1,102 +1,68 @@
- function handleWalls(shape) {
-      if (!wallsActive) return;
+function handleWalls(shape) {
+  if (!wallsActive) return;
 
-      let corners = [];
-      if (shape.radius) {
-        const padding = 1; // یا حتی shape.borderWidth / 2
-        corners = [
-          { x: shape.x - (shape.radius + padding), y: shape.y - (shape.radius + padding) },
-          { x: shape.x + (shape.radius + padding), y: shape.y + (shape.radius + padding) }
-        ];
-      }
-      if (shape.name === 'Triangle') {
-        const padding = 2;
-        corners = getTriangleCorners(shape).map(c => ({
-          x: c.x + (c.x < shape.x ? -padding : padding),
-          y: c.y + (c.y < shape.y ? -padding : padding)
-        }));
-      }
-      if (shape.name === 'Star') {
-        const padding = 3;
-        corners = getStarCorners(shape).map(c => ({
-          x: c.x + (c.x < shape.x ? -padding : padding),
-          y: c.y + (c.y < shape.y ? -padding : padding)
-        }));
-      
+  // دریافت نقاط کالیدر
+  let corners = [];
+  if (shape.name === 'Star') {
+    corners = getStarCorners(shape); // همه نقاط ستاره
+  } else if (shape.name === 'Square') {
+    corners = getSquareCorners(shape);
+  } else if (shape.name === 'Triangle') {
+    corners = getTriangleCorners(shape);
+  } else if (shape.radius) {
+    corners = [
+      { x: shape.x - shape.radius, y: shape.y - shape.radius },
+      { x: shape.x + shape.radius, y: shape.y + shape.radius }
+    ];
+  }
 
-      // }
-      if (shape.name === 'Square') {
-        corners = getSquareCorners(shape);
-      } 
+  const left = 0;
+  const right = canvas.width;
+  const top = 0;
+  const bottom = canvas.height;
+
+  let bounced = false;
+
+  // بررسی برخورد با هر دیوار
+  for (const c of corners) {
+    // چپ
+    if (c.x < left && shape.vx < 0) {
+      shape.vx = Math.abs(shape.vx);
+      bounced = true;
     }
-      // if (shape.type === 'Rectangle') {
-      //   corners = getRectangleCorners(shape);
-      // }
+    // راست
+    if (c.x > right && shape.vx > 0) {
+      shape.vx = -Math.abs(shape.vx);
+      bounced = true;
+    }
+    // بالا
+    if (c.y < top && shape.vy < 0) {
+      shape.vy = Math.abs(shape.vy);
+      bounced = true;
+    }
+    // پایین
+    if (c.y > bottom && shape.vy > 0) {
+      shape.vy = -Math.abs(shape.vy);
+      bounced = true;
+    }
+  }
 
-      // if (shape.type === 'SvgLetter') {
-      //   corners = getSvgLetterCorners(shape);
-
-      // }
-
-
-
-      const left = shape.radiusWithStroke;
-      const right = canvas.width - shape.radiusWithStroke;
-      const top = shape.radiusWithStroke;
-      const bottom = canvas.height - shape.radiusWithStroke;
-
-      if (shape.inside === undefined) shape.inside = true;
-      if (shape.wallBounces === undefined) shape.wallBounces = 0;
-      if (shape.maxWallBounces === undefined) shape.maxWallBounces = maxWallBounces;
-
-      // فقط وقتی کمتر از maxWallBounces هست، برگرداندن اعمال شود
-      if (shape.wallBounces < shape.maxWallBounces) {
-        let bounced = false;
-
-        if (shape.x - shape.radiusWithStroke < 0 && shape.vx < 0) {
-          shape.x = left;
-          shape.vx = Math.abs(shape.vx);
-          bounced = true;
-        }
-
-        if (shape.x + shape.radiusWithStroke > canvas.width && shape.vx > 0) {
-          shape.x = right;
-          shape.vx = -Math.abs(shape.vx);
-          bounced = true;
-        }
-
-        if (shape.y - shape.radiusWithStroke < 0 && shape.vy < 0) {
-          shape.y = top;
-          shape.vy = Math.abs(shape.vy);
-          bounced = true;
-        }
-
-        if (shape.y + shape.radiusWithStroke > canvas.height && shape.vy > 0) {
-          shape.y = bottom;
-          shape.vy = -Math.abs(shape.vy);
-          bounced = true;
-        }
-
-        if (bounced) shape.wallBounces++;
-      } else {
-        // بعد از سه بونس، اجازه بده از صفحه خارج شود
-        shape.inside = false;
-        // حذف وقتی 20٪ از مرز خارج شد
-        const marginX = canvas.width * 0.2;
-        const marginY = canvas.height * 0.2;
-
-        if (
-          shape.x < -marginX || shape.x > canvas.width + marginX ||
-          shape.y < -marginY || shape.y > canvas.height + marginY
-        ) {
-          shape.remove = true; // پرچم حذف
-        }
-      }
+  if (bounced) {
+    shape.wallBounces = (shape.wallBounces || 0) + 1;
+    // چرخش جزئی روی برخورد
+    shape.angVel += (Math.random() - 0.5) * 0.2; 
+    // جابجایی کل شکل برای خارج کردن نقاط از دیوار
+    shape.x = Math.max(shape.x, shape.radius || 0);
+    shape.x = Math.min(shape.x, canvas.width - (shape.radius || 0));
+    shape.y = Math.max(shape.y, shape.radius || 0);
+    shape.y = Math.min(shape.y, canvas.height - (shape.radius || 0));
+  }
+}
 
       //------exit permission
 
 
-    }
+    
     function drawWalls() {
       const thickness = 3; // ضخامت دیوار
 
