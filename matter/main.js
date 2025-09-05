@@ -10,7 +10,8 @@ let totalShapes = 0;
  let shapeCounter = 0; 
 let remainedShapes = 0;
 let started = false;
-let lastRegenTime = performance.now()/1000;
+let startTime = null;  
+let currentTime = 0;
 let globalSeconds = 0;
 setInterval(() => globalSeconds++, 1000);
 
@@ -21,22 +22,22 @@ let lastRoundTime = performance.now() / 1000;
 
 let wallActive = false; 
 const BORDER = 7;
-let wallsStartTime = null; // زمان فعال شدن دیوارها
-const WALL_BLOCK_DURATION = 50; // ثانیه
+let wallsStartTime = null; 
+const WALL_BLOCK_DURATION = 50;
 let lastSpawnSide = null;
 let hoveredShape = null;
 let showColliders = false;
 
-window.maxWallBounces = 5;
+window.maxWallBounces = 3;
 window.shapeSize = 100;
 
-window.SPEED = window.SPEED ?? 1;          // سرعت قابل تنظیم
-window.REGEN_INTERVAL = window.REGEN_INTERVAL ?? 50; // ثانیه
+window.SPEED = window.SPEED ?? 1;        
+window.REGEN_INTERVAL = window.REGEN_INTERVAL ?? 50; 
 window.MAX_SHAPES = window.MAX_SHAPES ?? 20;
 
-let MARGIN = Math.min(canvas.width, canvas.height) * 0.15; // مقدار اولیه برای ایمن بودن هدف
-const SPAWN_OFFSET = 0.5; // 50% خارج از صفحه (طبق خواست شما)
-
+let MARGIN = Math.min(canvas.width, canvas.height) * 0.15; 
+const SPAWN_OFFSET = 0.5; 
+let bounced = false;
 // ====================== Matter.js ======================
 const { Engine, World, Bodies, Body, Runner } = Matter;
 const engine = Engine.create();
@@ -77,18 +78,17 @@ function resize()
     updateAllShapesSize();
    }
     //    shapes.forEach(s => {
-    //     if (s.buildSVG) s.buildSVG();  // دوباره SVG و کالیدر ساخته می‌شود
+    //     if (s.buildSVG) s.buildSVG(); 
     // });
 
-    // drawAllShapes(); // رندر مجدد canvas
+    // drawAllShapes(); 
 window.addEventListener('resize', resize);
 resize();
 
 
 // function updateShapeSize() {
-//   // فرض کنیم اندازه پایه برای 1000px عرض است
 //   const baseSize = 100;
-//   const scale = canvas.width / 1000;  // نسبت فعلی به اندازه پایه
+//   const scale = canvas.width / 1000; 
 //   shapeSize = baseSize * scale;
 // }
 
@@ -97,7 +97,6 @@ resize();
 //   const cy = canvas.height / 2;
 
 //   for (const s of shapes) {
-//     // تغییر سرعت برای هماهنگی با اندازه جدید
 //     let dx = cx - s.x;
 //     let dy = cy - s.y;
 //     const dist = Math.hypot(dx, dy) || 1;
@@ -126,10 +125,7 @@ function ensureInitial() {
   generateShapesWithDelay(MAX_SHAPES, 300);
 }
 
-// ===================== کلاس‌ها =====================
 
-
-// ===================== توابع کمکی =====================
 function getRandomSide() {
   const sides = ["left", "right", "top", "bottom"];
   return sides[Math.floor(Math.random() * sides.length)];
@@ -138,7 +134,7 @@ function getRandomColor() {
   const letters = '0123456789ABCDEF';
   let color = '#';
   for (let i = 0; i < 6; i++) {
-    color += letters[Math.floor(Math.random() * 16)]; // Math.random() درست
+    color += letters[Math.floor(Math.random() * 16)]; // Math.random() 
   }
   return color;
 }
@@ -151,7 +147,7 @@ function generateShapesWithDelay(count, delay) {
   function generateNext() {
     if (i >= count) return;
 
-    const outside = Math.random() < 0.2; // 20% بیرون
+    const outside = Math.random() < 0.2; 
     const sh = addShape(outside);
     if (sh) {
       shapes.push(sh);
@@ -186,12 +182,11 @@ function generateShapesWithDelay(count, delay) {
 //     sy = canvas.height + canvas.height * offset;
 //   }
 
-//   // فقط SvgStar بساز
 //   let shape = new SvgStar(sx, sy, {
 //     entrySide: side,
-//     strokeWidth: 7,        // اختیاری
-//     fillColor: 'yellow',   // اختیاری
-//     borderColor: 'orange'  // اختیاری
+//     strokeWidth: 7,       
+//     fillColor: 'yellow', 
+//     borderColor: 'orange' 
 //   });
 
 //   shapeCounter++;
@@ -199,7 +194,6 @@ function generateShapesWithDelay(count, delay) {
 // }
 
 
-// spawnShape — فقط موقعیت محاسبه می‌کند و سپس addShape(x,y) را صدا می‌زند
 function spawnShape() {
   const spawnType = Math.random() < 0.25 ? "corner" : "side";
   let sx, sy;
@@ -231,104 +225,107 @@ function spawnShape() {
     }
   }
 
-  const star = generateShape(sx, sy);
+  const shapeType = Math.random() < 0.5 ? "Star" : "Circle";
 
-  if (star.body) {
+  const shape = generateShape(sx, sy ,shapeType);
+
+  if (shape.body) {
 const cx = canvas.width / 2;
 const cy = canvas.height / 2;
-const dx = cx - star.x;
-const dy = cy - star.y;
+const dx = cx - shape.x;
+const dy = cy - shape.y;
 const dist = Math.hypot(dx, dy) || 1;
 const speed = window.SPEED || 2;
-star.vx = (dx / dist) * speed;
-star.vy = (dy / dist) * speed;
-Matter.Body.setVelocity(star.body, { x: star.vx, y: star.vy });
+shape.vx = (dx / dist) * speed;
+shape.vy = (dy / dist) * speed;
 
 
-    // ویژگی‌های فیزیک برای برخورد طبیعی
-    star.body.restitution = 0.8;   // کشسانی
-    star.body.frictionAir = 0;     // حفظ سرعت ثابت
-    star.body.friction = 0;
-    star.body.angularVelocity = (Math.random() - 0.5) * 0.1; // کمی چرخش اولیه
-    star.body.inertia = Infinity;  // کنترل چرخش بیشتر توسط نیروها
+
+Matter.Body.setVelocity(shape.body, { x: shape.vx, y: shape.vy });
+
+
+    shape.body.restitution = 0.8;   
+    shape.body.frictionAir = 0;  
+    shape.body.friction = 0;
+    shape.body.angularVelocity = (Math.random() - 0.5) * 0.1; 
+    shape.body.inertia = Infinity;  
   }
 
-  return star;
+  return shape;
 }
 
-// addShape(x,y) — ستاره می‌سازد، سرعت را تنظیم می‌کند، و آن را به آرایه اضافه می‌کند
-function generateShape(x, y) {
-  // (1) ساخت SvgStar
-const star = new SvgStar(x, y, {
-  strokeWidth: 7,
-  fillColor: getRandomColor(),
-  borderColor: getRandomColor()
-});
 
 
-  // -----------------------------
-  // ← اینجا کالیدر دقیق و Body Matter.js اضافه می‌کنیم
-  const verts = star.getStarColliderWorld(); // کالیدر دقیق ستاره
-  star.body = Matter.Bodies.fromVertices(
-    star.x,
-    star.y,
+function generateShape(x, y, shapeType) {
+  let shape;
+
+  if(shapeType === "Star") {
+    shape = new SvgStar(x, y, {
+      strokeWidth: 7,
+      fillColor: getRandomColor(),
+      borderColor: getRandomColor()
+    });
+
+    const verts = shape.getStarColliderWorld(); 
+    shape.body = Matter.Bodies.fromVertices(
+      shape.x,
+      shape.y,
+      [verts],
+      {
+        restitution: 0.8,   
+        friction: 0,
+        frictionAir: 0.0,    
+        angularVelocity: (Math.random() - 0.5) * 0.1,
+        render: { fillStyle: shape.fillColor, strokeStyle: shape.borderColor }
+      },
+      true
+    );
+  } else if (shapeType === "Circle") {
+  shape = new SvgCircle(x, y, {
+    strokeWidth: 7,
+    fillColor: getRandomColor(),
+    borderColor: getRandomColor()
+  });
+
+  // استفاده از کالیدر دایره بجای Bodies.circle
+  const verts = shape.getCircleColliderWorld(); // مثل ستاره، نقاط محیطی کالیدر دایره
+
+  shape.body = Matter.Bodies.fromVertices(
+    shape.x,
+    shape.y,
     [verts],
     {
-    restitution: 0.8,      // کشسانی بالا
-    friction: 0,
-    frictionAir: 0.0,     // کمی مقاومت هوا برای کنترل حرکت
-    angularVelocity: (Math.random() - 0.5) , // چرخش اولیه تصادفی
-      render: {
-        fillStyle: star.fillColor,
-        strokeStyle: star.borderColor
-      }
+      restitution: 0.8,
+      friction: 0,
+      frictionAir: 0,
+      angularVelocity: (Math.random() - 0.5) * 0.1,
+      render: { fillStyle: shape.fillColor, strokeStyle: shape.borderColor }
     },
-    true // اجازه decomposition خودکار برای شکل‌های پیچیده
+    true
   );
+}
 
-  star.body.svgStar = star;
-  Matter.World.add(world, star.body);
-  // -----------------------------
-  shapes.push(star);
+
+  // اتصال shape به body
+  shape.body.svgShape = shape;
+
+  // اضافه کردن به دنیا و آرایه‌ها
+  Matter.World.add(world, shape.body);
+  shapes.push(shape);
   totalShapes++;
   remainedShapes++;
 
-  return star;
-}
-
-function checkShapeCollisionWithBounds(shape) {
-  if (!shape.body) return;
-
-  const verts = shape.getStarColliderWorld();
-
-  let vx = shape.body.velocity.x;
-  let vy = shape.body.velocity.y;
-  let bounced = false;
-
-  verts.forEach(v => {
-    if (v.x < 0 || v.x > canvas.width) {
-      vx = -vx;
-      bounced = true;
-    }
-    if (v.y < 0 || v.y > canvas.height) {
-      vy = -vy;
-      bounced = true;
-    }
-  });
-
-  if (bounced) {
-    Matter.Body.setVelocity(shape.body, { x: vx, y: vy });
-  }
+  return shape;
 }
 
 
 
-// generateShapesWithDelay — نمونهٔ ساده‌ی درست برای فراخوانی spawnShape
+
 function generateShapesWithDelay(count, delay) {
   let i = 0;
   function generateNext() {
     if (i >= count) return;
-    spawnShape(); // spawnShape خودش addShape را صدا می‌زند
+    spawnShape(); 
     i++;
     setTimeout(generateNext, delay);
   }
@@ -349,7 +346,7 @@ function removeShape(shape) {
   const index = shapes.indexOf(shape);
   if (index !== -1) {
     shapes.splice(index, 1);
-    remainedShapes--; // هر بار حذف شد
+    remainedShapes--; 
   }
 }
 
@@ -362,17 +359,15 @@ function loop(now) {
   const dt = Math.min(0.05, (now - last) / 1000);
   last = now;
 
-  const currentTime = performance.now() / 1000;
+  const timeNow = performance.now() / 1000;
 
-  // هر راند
-  if (currentTime - lastRoundTime >= roundTime) {
+  if (timeNow - lastRoundTime >= roundTime) {
     round++;
-    lastRoundTime = currentTime;
+    lastRoundTime = timeNow;
     generateShapesWithDelay(MAX_SHAPES, 300);
   }
 
     Engine.update(engine, dt * 1000);
-  // پاک کردن صفحه
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 
@@ -381,41 +376,37 @@ for (const s of shapes) {
 
   const pos = s.body.position;
   const angle = s.body.angle;
-const verts = s.getStarColliderWorld();
+// const verts = s.getStarColliderWorld();
 let vx = s.body.velocity.x;
 let vy = s.body.velocity.y;
-let bounced = false;
 
-verts.forEach(v => {
-  if (v.x > 0 && v.x < canvas.width) return;
-  if (v.y > 0 && v.y < canvas.height) return;
-
-  if (v.x < 0 || v.x > canvas.width) {
-    vx = -vx;
-    bounced = true;
-  }
-  if (v.y < 0 || v.y > canvas.height) {
-    vy = -vy;
-    bounced = true;
-  }
-});
-
+  handleWalls(s.body);  
 if (bounced) {
   Matter.Body.setVelocity(s.body, { x: vx, y: vy });
 }
-
   s.draw(ctx, pos.x, pos.y, angle);
 }
 
-  if (wallActive) drawWalls();
-  // حذف شکل‌هایی که خارج میشن
   for (let i = shapes.length - 1; i >= 0; i--) {
     if (shapes[i].remove) {
       removeShape(shapes[i]);
     }
   }
 
-  // HUD
+if (!wallActive && shapes.some(s => {
+  const pos = s.body.position; 
+  return pos.x > 0 && pos.x < canvas.width && pos.y > 0 && pos.y < canvas.height;
+})) {
+  wallActive = true;
+}
+
+if (wallActive) {
+  drawWalls();
+}
+
+  if (startTime !== null) {
+    currentTime = (performance.now() - startTime) / 1000; // به ثانیه
+  }
   hud.textContent = `Time: ${Math.floor(currentTime)}s · Round: ${round} · Shapes: ${totalShapes} · Remained: ${remainedShapes}`;
 
   requestAnimationFrame(loop);
@@ -437,7 +428,6 @@ liveBtn.style.display = 'block';
 toggleCollider.style.display = 'none';
 
 startBtn.addEventListener('click', () => {
-  // مخفی کردن استارت پنل
   startBtn.style.display = 'none';
   liveBtn.style.display = 'none';
   controlPanel.style.display = 'none';
@@ -453,7 +443,7 @@ closeControlPanel.addEventListener('click', () => {
 
 liveBtn.addEventListener('click', () => {
   if (controlPanel.style.display === 'none' || controlPanel.style.display === '') {
-    controlPanel.style.display = 'block'; // یا grid یا هرچی استایل اصلیته
+    controlPanel.style.display = 'block'; 
   } else {
     controlPanel.style.display = 'none';
   }
@@ -465,15 +455,14 @@ liveBtn.addEventListener('click', () => {
 function startGame() {
 
   ensureInitial();
-  shapes = [];       // ← همه شکل‌های قدیمی پاک بشن
+  shapes = [];      
   totalShapes = 0;
   remainedShapes = 0;
-
-
-  // --- شروع حلقه ---
+ currentTime = 0; 
+startTime = performance.now();
   started = true;
   last = performance.now();
-  lastRoundTime = performance.now() / 1000; // ریست زمان راند
+  lastRoundTime = performance.now() / 1000; 
 
   requestAnimationFrame(loop);
 }

@@ -14,7 +14,6 @@
       background: #000;
     }
 
-    /* HUD بالا سمت چپ */
     #hud {
       position: fixed;
       left: 12px;
@@ -56,18 +55,13 @@
     .btn-container {
       position: fixed;
       bottom: 20px;
-      /* فاصله از پایین */
       right: 20px;
-      /* فاصله از راست */
       display: flex;
       flex-direction: column;
-      /* دکمه‌ها زیر هم */
       gap: 10px;
-      /* فاصله بین دکمه‌ها */
       z-index: 1100;
     }
 
-    /* استایل دکمه‌ها */
     #toggleDebug,
     #toggleLive {
       padding: 12px 18px;
@@ -79,7 +73,6 @@
       transition: all 0.2s ease;
     }
 
-    /* رنگ‌ها */
     #toggleDebug {
       background-color: #007bff;
     }
@@ -105,13 +98,10 @@
       left: 50%;
       transform: translate(-50%, -50%);
       background: rgba(51, 51, 51, 0.4);
-      /* فقط بک‌گراند نیمه‌شفاف */
       color: #fff;
-      /* متن کامل واضح */
       font-family: sans-serif;
       font-size: 14px;
       display: none;
-      /* ابتدا مخفی */
       padding: 20px;
       border-radius: 10px;
       width: 320px;

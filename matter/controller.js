@@ -7,7 +7,6 @@ function bindSlider(sliderId, valueId, variableName, step = 1, decimals = 0) {
     return parseFloat(value.toFixed(decimals));
   }
 
-  // مقدار اولیه
   let value = formatValue(parseFloat(slider.value));
   valSpan.innerText = value;
   window[variableName] = value;
@@ -29,7 +28,6 @@ function bindSlider(sliderId, valueId, variableName, step = 1, decimals = 0) {
   });
 }
 
-// معمولی
 bindSlider("SizeSliderStart", "SizeValStart", "shapeSize");
 bindSlider("maxShapesSliderStart", "maxShapesValStart", "MAX_SHAPES");
 bindSlider("speedSliderStart", "speedValStart", "SPEED", 0.15, 2); // ← دو رقم اعشار
