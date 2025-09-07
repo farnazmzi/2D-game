@@ -201,208 +201,247 @@ function generateShapesWithDelay(count, delay) {
 }
 
 
-// function tryGenerateShape() {
-//   const side = getRandomSide();
-//   const offset = 0.8;
-//   let sx, sy;
-
-//   if (side === "left") {
-//     sx = -canvas.width * offset;
-//     sy = Math.random() * canvas.height;
-//   } else if (side === "right") {
-//     sx = canvas.width + canvas.width * offset;
-//     sy = Math.random() * canvas.height;
-//   } else if (side === "top") {
-//     sx = Math.random() * canvas.width;
-//     sy = -canvas.height * offset;
-//   } else {
-//     sx = Math.random() * canvas.width;
-//     sy = canvas.height + canvas.height * offset;
-//   }
-
-//   let shape = new SvgStar(sx, sy, {
-//     entrySide: side,
-//     strokeWidth: 7,       
-//     fillColor: 'yellow', 
-//     borderColor: 'orange' 
-//   });
-
-//   shapeCounter++;
-//   return shape;
-// }
-
 
 function spawnShape() {
-  const spawnType = Math.random() < 0.25 ? "corner" : "side";
-  let sx, sy;
+  let shape;
+  let safe = false;
+  let tries = 0;
 
-  if (spawnType === "corner") {
-    const corners = [
-      [0, 0],
-      [canvas.width, 0],
-      [0, canvas.height],
-      [canvas.width, canvas.height]
-    ];
-    const corner = corners[Math.floor(Math.random() * corners.length)];
-    sx = corner[0] < canvas.width / 2 ? -canvas.width * SPAWN_OFFSET : canvas.width + canvas.width * SPAWN_OFFSET;
-    sy = corner[1] < canvas.height / 2 ? -canvas.height * SPAWN_OFFSET : canvas.height + canvas.height * SPAWN_OFFSET;
-  } else {
-    const side = getRandomSide();
-    if (side === "left") {
-      sx = -canvas.width * SPAWN_OFFSET;
-      sy = Math.random() * canvas.height;
-    } else if (side === "right") {
-      sx = canvas.width + canvas.width * SPAWN_OFFSET;
-      sy = Math.random() * canvas.height;
-    } else if (side === "top") {
-      sx = Math.random() * canvas.width;
-      sy = -canvas.height * SPAWN_OFFSET;
-    } else { // bottom
-      sx = Math.random() * canvas.width;
-      sy = canvas.height + canvas.height * SPAWN_OFFSET;
+  while (!safe && tries < 10) {
+    tries++;
+
+    let sx, sy;
+    const spawnType = Math.random() < 0.25 ? "corner" : "side";
+
+    if (spawnType === "corner") {
+      const corners = [
+        [0, 0],
+        [canvas.width, 0],
+        [0, canvas.height],
+        [canvas.width, canvas.height]
+      ];
+      const corner = corners[Math.floor(Math.random() * corners.length)];
+      sx = corner[0] < canvas.width / 2
+        ? -canvas.width * SPAWN_OFFSET
+        : canvas.width + canvas.width * SPAWN_OFFSET;
+      sy = corner[1] < canvas.height / 2
+        ? -canvas.height * SPAWN_OFFSET
+        : canvas.height + canvas.height * SPAWN_OFFSET;
+    } else {
+      const side = getRandomSide();
+      if (side === "left") {
+        sx = -canvas.width * SPAWN_OFFSET;
+        sy = Math.random() * canvas.height;
+      } else if (side === "right") {
+        sx = canvas.width + canvas.width * SPAWN_OFFSET;
+        sy = Math.random() * canvas.height;
+      } else if (side === "top") {
+        sx = Math.random() * canvas.width;
+        sy = -canvas.height * SPAWN_OFFSET;
+      } else { // bottom
+        sx = Math.random() * canvas.width;
+        sy = canvas.height + canvas.height * SPAWN_OFFSET;
+      }
+    }
+
+    const types = ["Glyph"];
+    // const types = ["Star", "Circle", "Triangle", "Square", "Diamond", "Rectangle", "Glyph","RegularPolygon"];
+    const shapeType = types[Math.floor(Math.random() * types.length)];
+
+    const commonPhysicsProps = {
+      restitution: 0.5,
+      friction: 0.0,
+      frictionAir: 0.0,
+      density: 0.001,
+      slop: 0.01,
+      angularVelocity: (Math.random() - 0.5) * 0.05
+    };
+
+    if (shapeType === "Star") {
+      shape = new SvgStar(sx, sy, {
+        strokeWidth: 7,
+        fillColor: getRandomColor(),
+        borderColor: getRandomColor()
+      });
+      const verts = shape.getStarColliderWorld();
+      shape.body = Matter.Bodies.fromVertices(shape.x, shape.y, [verts], {
+        ...commonPhysicsProps,
+        render: { fillStyle: shape.fillColor, strokeStyle: shape.borderColor }
+      }, true);
+
+    } else if (shapeType === "Circle") {
+      shape = new SvgCircle(sx, sy, {
+        strokeWidth: 7,
+        fillColor: getRandomColor(),
+        borderColor: getRandomColor()
+      });
+      const verts = shape.getCircleColliderWorld();
+      shape.body = Matter.Bodies.fromVertices(shape.x, shape.y, [verts], {
+        ...commonPhysicsProps,
+        render: { fillStyle: shape.fillColor, strokeStyle: shape.borderColor }
+      }, true);
+
+    } else if (shapeType === "Triangle") {
+      shape = new SvgTriangle(sx, sy, {
+          strokeWidth: 7,
+        fillColor: getRandomColor(),
+        borderColor: getRandomColor()
+      });
+      const verts = shape.getColliderPoints();
+      shape.body = Matter.Bodies.fromVertices(shape.x, shape.y, [verts], {
+        ...commonPhysicsProps,
+        render: { fillStyle: shape.fill, strokeStyle: shape.stroke }
+      }, true);
+
+    } else if (shapeType === "Square") {
+      shape = new SvgSquare(sx, sy, {
+        fillColor: getRandomColor(),
+        borderColor: getRandomColor()
+      });
+      const verts = shape.getColliderPoints();
+      shape.body = Matter.Bodies.fromVertices(shape.x, shape.y, [verts], {
+        ...commonPhysicsProps,
+        render: { fillStyle: shape.fill, strokeStyle: shape.stroke }
+      }, true);
+
+    } else if (shapeType === "Diamond") {
+      shape = new SvgOctagon(sx, sy, {
+        fillColor: getRandomColor(),
+        borderColor: getRandomColor()
+      });
+      const verts = shape.getColliderPoints();
+      shape.body = Matter.Bodies.fromVertices(shape.x, shape.y, [verts], {
+        ...commonPhysicsProps,
+        render: { fillStyle: shape.fill, strokeStyle: shape.stroke }
+      }, true);
+
+    } else if (shapeType === "Rectangle") {
+      shape = new SvgRectangle(sx, sy, {
+        fillColor: getRandomColor(),
+        borderColor: getRandomColor()
+      });
+      const verts = shape.getColliderPoints();
+      shape.body = Matter.Bodies.fromVertices(shape.x, shape.y, [verts], {
+        ...commonPhysicsProps,
+        render: { fillStyle: shape.fill, strokeStyle: shape.stroke }
+      }, true);
+
+    } 
+
+    
+     else if (shapeType === "RegularPolygon") {
+      shape = new SvgRegularPolygonShape(sx, sy, 8,{
+        fillColor: getRandomColor(),
+        fill: getRandomColor()
+      });
+      const verts = shape.getColliderPoints();
+      shape.body = Matter.Bodies.fromVertices(shape.x, shape.y, [verts], {
+        ...commonPhysicsProps,
+        render: { fillStyle: shape.fill, strokeStyle: shape.stroke }
+      }, true);
+
+    } 
+    
+    else if (shapeType === "Glyph") {
+      const keys = Object.keys(GLYPH5x7);
+      const char = keys[Math.floor(Math.random() * keys.length)];
+      shape = new GlyphLetter(sx, sy, char, {
+        size: 120,
+        fillColor: getRandomColor(),
+        fill: getRandomColor()
+      });
+
+      shape.bodies = [];
+
+      const polys = shape.glyphColliderExact;
+      polys.forEach(poly => {
+        const cleanPoly = poly.filter((p, i, arr) => {
+          const next = arr[(i + 1) % arr.length];
+          return Math.hypot(next.x - p.x, next.y - p.y) > 0.1;
+        });
+        if (cleanPoly.length < 3) return;
+
+        const convexPolys = (typeof decomp !== "undefined" && decomp)
+          ? decomp.quickDecomp(cleanPoly)
+          : [cleanPoly];
+
+        convexPolys.forEach(cPoly => {
+          const minX = Math.min(...cPoly.map(p => p.x));
+          const maxX = Math.max(...cPoly.map(p => p.x));
+          const minY = Math.min(...cPoly.map(p => p.y));
+          const maxY = Math.max(...cPoly.map(p => p.y));
+          const w = maxX - minX;
+          const h = maxY - minY;
+          const cx = sx + minX + w / 2;
+          const cy = sy + minY + h / 2;
+
+          const body = Matter.Bodies.rectangle(cx, cy, w, h, {
+            isStatic: false,
+            restitution: 0.7,
+            friction: 0.05,
+            frictionAir: 0.01,
+            density: 0.01,
+            render: { fillStyle: shape.fill, strokeStyle: shape.stroke }
+          });
+
+          body.offset = { x: minX + w / 2, y: minY + h / 2 };
+          body.svgShape = shape;
+
+          shape.bodies.push(body);
+          Matter.World.add(engine.world, body);
+        });
+      });
+
+      if (shape.bodies.length > 0) {
+        shape.body = Matter.Body.create({
+          parts: shape.bodies,
+          isStatic: false,
+          restitution: 0.7,
+          friction: 0.05,
+          frictionAir: 0.01,
+          density: 0.01
+        });
+        Matter.Body.setPosition(shape.body, { x: shape.x, y: shape.y });
+        shape.body.svgShape = shape;
+        Matter.World.add(engine.world, shape.body);
+      }
+    }
+
+    if (shape?.body) {
+      safe = shapes.every(s => {
+        const dx = s.x - shape.x;
+        const dy = s.y - shape.y;
+        const dist = Math.hypot(dx, dy);
+        return dist > (window.shapeSize || 120) * 1.2;
+      });
+
+      if (!safe) {
+        Matter.World.remove(engine.world, shape.body);
+        continue;
+      }
+
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const dx = cx - shape.x;
+      const dy = cy - shape.y;
+      const dist = Math.hypot(dx, dy) || 1;
+      const speed = window.SPEED || 2;
+      shape.vx = (dx / dist) * speed;
+      shape.vy = (dy / dist) * speed;
+
+      Matter.Body.setVelocity(shape.body, { x: shape.vx, y: shape.vy });
+
+      shape.body.svgShape = shape;
+
+      Matter.World.add(world, shape.body);
+      shapes.push(shape);
+      totalShapes++;
+      remainedShapes++;
     }
   }
 
- const types = ["Star", "Circle", "Glyph"];
-const shapeType = types[Math.floor(Math.random() * types.length)];
-
-  const shape = generateShape(sx, sy ,"Glyph");
-
-  if (shape.body) {
-const cx = canvas.width / 2;
-const cy = canvas.height / 2;
-const dx = cx - shape.x;
-const dy = cy - shape.y;
-const dist = Math.hypot(dx, dy) || 1;
-const speed = window.SPEED || 2;
-shape.vx = (dx / dist) * speed;
-shape.vy = (dy / dist) * speed;
-
-
-
-Matter.Body.setVelocity(shape.body, { x: shape.vx, y: shape.vy });
-
-
-    shape.body.restitution = 0.8;   
-    shape.body.frictionAir = 0;  
-    shape.body.friction = 0;
-    shape.body.angularVelocity = (Math.random() - 0.5) * 0.1; 
-    shape.body.inertia = Infinity;  
-  }
-
   return shape;
 }
-
-
-
-function generateShape(x, y, shapeType) {
-  let shape;
-
-  if(shapeType === "Star") {
-    shape = new SvgStar(x, y, {
-      strokeWidth: 7,
-      fillColor: getRandomColor(),
-      borderColor: getRandomColor()
-    });
-
-    const verts = shape.getStarColliderWorld(); 
-    shape.body = Matter.Bodies.fromVertices(
-      shape.x,
-      shape.y,
-      [verts],
-      {
-        restitution: 0.8,   
-        friction: 0,
-        frictionAir: 0.0,    
-        angularVelocity: (Math.random() - 0.5) * 0.1,
-        render: { fillStyle: shape.fillColor, strokeStyle: shape.borderColor }
-      },
-      true
-    );
-  } else if (shapeType === "Circle") {
-  shape = new SvgCircle(x, y, {
-    strokeWidth: 7,
-    fillColor: getRandomColor(),
-    borderColor: getRandomColor()
-  });
-
-  // استفاده از کالیدر دایره بجای Bodies.circle
-  const verts = shape.getCircleColliderWorld(); // مثل ستاره، نقاط محیطی کالیدر دایره
-
-  shape.body = Matter.Bodies.fromVertices(
-    shape.x,
-    shape.y,
-    [verts],
-    {
-      restitution: 0.8,
-      friction: 0,
-      frictionAir: 0,
-      angularVelocity: (Math.random() - 0.5) * 0.1,
-      render: { fillStyle: shape.fillColor, strokeStyle: shape.borderColor }
-    },
-    true
-  );
-}
-else if (shapeType === "Glyph") {
-    const keys = Object.keys(GLYPH5x7);
-    const char = keys[Math.floor(Math.random() * keys.length)];
-    shape = new GlyphLetter(x, y, char, {
-      size: 120,
-      stroke: getRandomColor(),
-      fill: getRandomColor()
-    });
-
- const parts = shape.glyphColliderOffset
-    .filter(poly => poly && poly.length >= 3) // فقط poly معتبر
-    .map(poly => 
-      Matter.Bodies.fromVertices(
-        shape.x,
-        shape.y,
-        poly,
-        {
-          restitution: 0.8,
-          friction: 0,
-          frictionAir: 0,
-          angularVelocity: (Math.random() - 0.5) * 0.05, // چرخش نرم
-          render: { fillStyle: shape.fill, strokeStyle: shape.stroke }
-        },
-        true
-      )
-    );
-
-  // ترکیب همه partها در یک Body
-  shape.body = Matter.Body.create({
-    parts,
-    restitution: 0.8,
-    friction: 0,
-    frictionAir: 0.01, // کمی مقاوت هوا برای نرم شدن حرکت
-  });
-
-
-
-    Matter.Body.setPosition(shape.body, { x: shape.x, y: shape.y });
-    shape.body.svgShape = shape;
-
-    Matter.World.add(world, shape.body);
-    shapes.push(shape);
-    totalShapes++;
-    remainedShapes++;
-}
-
-
-  // اتصال shape به body
-  shape.body.svgShape = shape;
-
-  // اضافه کردن به دنیا و آرایه‌ها
-  Matter.World.add(world, shape.body);
-  shapes.push(shape);
-  totalShapes++;
-  remainedShapes++;
-
-  return shape;
-}
-
-
 
 
 function generateShapesWithDelay(count, delay) {
@@ -433,8 +472,40 @@ function removeShape(shape) {
     remainedShapes--; 
   }
 }
+// ----------------------
+function updateGlyphPosition(glyph) {
+  if (!glyph || !glyph.bodies) return;
+
+  const cos = Math.cos(glyph.angle || 0);
+  const sin = Math.sin(glyph.angle || 0);
+
+  glyph.bodies.forEach(body => {
+    if (!body.offset) return;
+    const ox = body.offset.x;
+    const oy = body.offset.y;
+    const px = glyph.x + ox * cos - oy * sin;
+    const py = glyph.y + ox * sin + oy * cos;
+    Matter.Body.setPosition(body, { x: px, y: py });
+    Matter.Body.setAngle(body, glyph.angle || 0);
+  });
+}
 
 
+Matter.Events.on(engine, 'collisionStart', function(event) {
+  const pairs = event.pairs;
+  pairs.forEach(pair => {
+    const bodies = [pair.bodyA, pair.bodyB];
+    bodies.forEach(body => {
+      if (body.svgShape) {
+        Matter.Body.setVelocity(body, { 
+          x: -body.velocity.x * 0.8, 
+          y: -body.velocity.y * 0.8 
+        });
+        Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.1);
+      }
+    });
+  });
+});
 
 
 function loop(now) {
@@ -458,13 +529,17 @@ function loop(now) {
 for (const s of shapes) {
   if (!s.body) continue;
 
+ if (s.bodies) {
+    updateGlyphPosition(s); 
+  }
+
   const pos = s.body.position;
   const angle = s.body.angle;
 // const verts = s.getStarColliderWorld();
 let vx = s.body.velocity.x;
 let vy = s.body.velocity.y;
 
-  handleWalls(s.body);  
+  // handleWalls(s.body);  
 if (bounced) {
   Matter.Body.setVelocity(s.body, { x: vx, y: vy });
 }

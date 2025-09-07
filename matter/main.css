@@ -21,8 +21,9 @@
       z-index: 999;
       color: #fff;
       font-size: 16px;
-      background: rgba(0, 0, 0, 0.35);
-      padding: 8px 10px;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.801);
+      background: rgba(0, 0, 0, 0.678);
+            padding: 8px 10px;
       border-radius: 8px;
     }
 #buttonContainercenter {
