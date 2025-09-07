@@ -1,4 +1,3 @@
-let wallBounces = -1; // متغیر عمومی
 
 function drawWalls() {
   const thickness = 3;
@@ -25,52 +24,46 @@ function drawWalls() {
 function handleWalls(body) {
   if (!wallActive) return;
 
-  const pos = body.position;  
+  const pos = body.position;
   const vel = body.velocity;
-  const r = body.circleRadius ? body.circleRadius : 20; // برای غیر دایره باید bbox حساب کنیم
+  const r = body.circleRadius ? body.circleRadius : 20;
   const px = pos.x;
   const py = pos.y;
 
-  if (body.wallBounces === undefined) body.wallBounces = -1;
-  if (body.maxWallBounces === undefined) body.maxWallBounces = maxWallBounces;
+  if (body.wallBounces === undefined) body.wallBounces = 0;
+  if (body.maxWallBounces === undefined) body.maxWallBounces = window.maxWallBounces;
+  if (body.hitMaxBounces === undefined) body.hitMaxBounces = false;
+  if (body.outOfBounds === undefined) body.outOfBounds = false;
 
-  // حالت آزاد (wallBounces = -1)
-  if (body.wallBounces === -1) {
-    if (
-      px - r < 0 || px + r > canvas.width ||
-      py - r < 0 || py + r > canvas.height
-    ) {
-      body.wallBounces = 0; // اولین ورود، دیوار فعال میشه
-    }
-    return;
-  }
+  let vx = vel.x, vy = vel.y;
+  let hitWall = false;
 
-  if (body.wallBounces >= 0 && body.wallBounces < body.maxWallBounces) {
-    let bounced = false;
-    let vx = vel.x, vy = vel.y;
+  const margin = 10;
 
-    if (px - r < 0 && vx < 0) { vx = Math.abs(vx); bounced = true; }
-    if (px + r > canvas.width && vx > 0) { vx = -Math.abs(vx); bounced = true; }
-    if (py - r < 0 && vy < 0) { vy = Math.abs(vy); bounced = true; }
-    if (py + r > canvas.height && vy > 0) { vy = -Math.abs(vy); bounced = true; }
+  // برخورد با دیوار
+  if (!body.hitMaxBounces) {
+    if (px - r < margin && vx < 0) { vx = Math.abs(vx); hitWall = true; }
+    if (px + r > canvas.width - margin && vx > 0) { vx = -Math.abs(vx); hitWall = true; }
+    if (py - r < margin && vy < 0) { vy = Math.abs(vy); hitWall = true; }
+    if (py + r > canvas.height - margin && vy > 0) { vy = -Math.abs(vy); hitWall = true; }
 
-    if (bounced) {
+    if (hitWall) {
       Matter.Body.setVelocity(body, { x: vx, y: vy });
       body.wallBounces++;
     }
+
+    if (body.wallBounces >= body.maxWallBounces) {
+      body.hitMaxBounces = true; // دفعه بعد اجازه میده بره بیرون
+    }
   }
 
-  if (body.wallBounces >= body.maxWallBounces) {
-    body.wallBounces = -1; // دوباره آزاد بشه
-  }
-
-  // حذف وقتی خارج شد
+  // فقط وقتی hitMaxBounces true شد، شی میتونه خارج بشه
   const marginX = canvas.width * 0.2;
   const marginY = canvas.height * 0.2;
-  if (
-    px < -marginX || px > canvas.width + marginX ||
-    py < -marginY || py > canvas.height + marginY
-  ) {
-    body.remove = true;
+  if (body.hitMaxBounces) {
+    if (px < -marginX || px > canvas.width + marginX ||
+        py < -marginY || py > canvas.height + marginY) {
+      outOfBounds = true; // فقط همین شی
+    }
   }
 }

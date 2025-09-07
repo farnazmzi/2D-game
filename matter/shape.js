@@ -15,6 +15,8 @@ class SvgStar {
     this.restitution = opts.restitution ?? 0.8;
     this.spikes = opts.spikes || 5;
     this.wallBounces = 0;
+  this.canBounce = true;
+  
 
     this.buildSVG();
     this.buildStarColliderOffsets();
@@ -113,7 +115,6 @@ class SvgStar {
     ctx.drawImage(this.img, -this.size / 2, -this.size / 2, this.size, this.size);
 
     if (showColliders) {
-      // کالیدر اصلی
       ctx.strokeStyle = "#18ed09";
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -124,7 +125,6 @@ class SvgStar {
       ctx.closePath();
       ctx.stroke();
 
-      // کالیدر دوم با scale
       ctx.lineWidth = 0.6;
       const scale = 1.5;
       ctx.beginPath();
@@ -137,10 +137,9 @@ class SvgStar {
       ctx.closePath();
       ctx.stroke();
 
-      // متن wallBounces
       ctx.fillStyle = "#ffffff";
       ctx.font = "12px Arial";
-      ctx.fillText(`W:${this.wallBounces || 0}/${this.maxWallBounces || 3}`, -this.radius, this.radius);
+      ctx.fillText(`W:${this.body.wallBounces}/${this.body.maxWallBounces}`, -this.radius, this.radius);
     }
 
     ctx.restore();
@@ -233,7 +232,6 @@ class SvgCircle {
     }
   }
 
-  // offset کالیدر دایره (کمی کوچکتر یا بزرگتر برای برخورد دقیق)
   buildCircleColliderOffsets(scale = 1.06) {
     if (!this.circleColliderBase) this.buildCircleColliderBase();
     this.circleColliderOffset = this.circleColliderBase.map(p => ({
@@ -242,7 +240,6 @@ class SvgCircle {
     }));
   }
 
-  // نقاط world با اعمال position و angle
   getCircleColliderWorld() {
     if (!this.circleColliderOffset) this.buildCircleColliderOffsets();
     const cos = Math.cos(this.angle);
@@ -253,7 +250,6 @@ class SvgCircle {
     }));
   }
 
-  // متد مشابه getColliderPoints ستاره
   getColliderPoints() {
     return this.getCircleColliderWorld();
 
@@ -282,9 +278,7 @@ class SvgCircle {
     ctx.stroke();
 
 
-
     if (showColliders) {
-      // کالیدر اصلی
       ctx.strokeStyle = "#18ed09";
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -295,7 +289,6 @@ class SvgCircle {
       ctx.closePath();
       ctx.stroke();
 
-      // کالیدر دوم با scale
       ctx.lineWidth = 0.6;
       const scale = 1.2;
       ctx.beginPath();
@@ -308,10 +301,9 @@ class SvgCircle {
       ctx.closePath();
       ctx.stroke();
 
-      // متن wallBounces
       ctx.fillStyle = "#ffffff";
       ctx.font = "12px Arial";
-      ctx.fillText(`W:${this.wallBounces || 0}/${this.maxWallBounces || 3}`, -this.radius, this.radius);
+      ctx.fillText(`W:${this.body.wallBounces}/${this.maxWallBounces || 3}`, -this.radius, this.radius);
     }
 
 
@@ -319,7 +311,6 @@ class SvgCircle {
   }
 
   getCorners(steps = 12) {
-    // نقاط تقریبی دایره برای compatibility
     const cos = Math.cos(this.angle);
     const sin = Math.sin(this.angle);
     const points = [];
@@ -340,25 +331,23 @@ class GlyphLetter {
     this.x = x;
     this.y = y;
     this.angle = 0;
-    this.stroke = opts.stroke || "#000";
-    this.fill = opts.fill || "#fff";
+    this.fillColor = opts.fillColor || "lightblue";
+    this.borderColor = opts.borderColor || "blue";
     this.wallBounces = 0;
+  this.canBounce = true;
 
-    // ساخت SVG و گرفتن polys دقیق + strokeLocal
     const glyph = svgmaker.mkGlyph(this.char, {
-      stroke: this.stroke,
-      fill: this.fill,
+      stroke: this.borderColor,
+      fill: this.fillColor,
       size: this.size,
       outlinePx: 6
     });
     this.svg = glyph.svg;
-    this.colliderPolys = glyph.collider.polys; // polys دقیق از rectها
-    this.strokeLocal = glyph.strokeLocal; // ضخامت بوردر
+    this.colliderPolys = glyph.collider.polys;
+    this.strokeLocal = glyph.strokeLocal;
 
-    // merge کردن و گسترش با border
     this.buildGlyphColliderWithBorder();
 
-    // ساخت تصویر برای draw
     const parser = new DOMParser();
     const doc = parser.parseFromString(this.svg, "image/svg+xml");
     const xml = new XMLSerializer().serializeToString(doc.documentElement);
@@ -368,8 +357,11 @@ class GlyphLetter {
     this.img.src = "data:image/svg+xml;base64," + svg64;
     this.img.onload = () => { this.loaded = true; };
 
-    // جایگذاری برای Matter.js
     this.buildMatterBody();
+    this.body.wallBounces = 0;
+    this.body.maxWallBounces = window.maxWallBounces;
+    this.body.canBounce = true; 
+    this.body.svgShape = this;
   }
 
   mergeAdjacentRects(rectPolys) {
@@ -492,11 +484,12 @@ class GlyphLetter {
       restitution: 0.3
     });
 
-    // reference back for draw/debug
     this.body.svgShape = this;
   }
   get size() { return window.shapeSize; }
   get radius() { return this.size / 2; }
+
+
   draw(ctx) {
     if (!this.loaded || !this.body) return;
 
@@ -523,7 +516,7 @@ class GlyphLetter {
 
         ctx.fillStyle = "#ffffff";
         ctx.font = "12px Arial";
-        ctx.fillText(`W:${this.wallBounces || 0}/${this.maxWallBounces || 3}`, this.radius, this.radius);
+        ctx.fillText(`W:${this.body.wallBounces}/${window.maxWallBounces}`, this.radius, this.radius);
 
       });
     }
@@ -559,10 +552,10 @@ class SvgRectangle {
     this.fillColor = opts.fillColor || "lightblue";
     this.borderColor = opts.borderColor || "blue";
     this.restitution = opts.restitution ?? 0.8;
-    this.wallBounces = 0;
+    this.wallBounces = window.Bounces;
 
     this.width = opts.width || this.size;
-    this.height = opts.height || this.size * 0.6; // نسبت پیش‌فرض
+    this.height = opts.height || this.size * 0.6;
 
     this.buildSVG();
     this.buildRectCollider();
@@ -579,7 +572,7 @@ class SvgRectangle {
     this.vy = dy * SPEED_FACTOR;
   }
 
-  get size() { return window.shapeSize +40; }  // هماهنگ با window.shapeSize
+  get size() { return window.shapeSize + 40; }
   get radius() { return Math.max(this.width, this.height) / 2; }
 
   buildSVG() {
@@ -602,7 +595,6 @@ class SvgRectangle {
     this.img.src = "data:image/svg+xml;base64," + svg64;
     this.img.onload = () => { this.loaded = true; };
 
-    // کالیدر از نقاط SVG و اسکیل نسبت به size
     this.rectColliderBase = svgObj.collider.pts.map(p => {
       const scaleX = this.width / 100 * 0.85;
       const scaleY = this.height / 100 * 0.85;
@@ -613,7 +605,7 @@ class SvgRectangle {
   buildRectCollider() {
     const scale = 0.57;
     const w = (this.width / 2) * scale;
-    const h = (this.height / 2) * scale -2;
+    const h = (this.height / 2) * scale - 2;
     this.rectColliderBase = [
       { x: -w, y: -h },
       { x: w, y: -h },
@@ -673,7 +665,7 @@ class SvgRectangle {
 
       ctx.fillStyle = "#ffffff";
       ctx.font = "12px Arial";
-      ctx.fillText(`W:${this.wallBounces || 0}/${this.maxWallBounces || 3}`, -this.radius, this.radius - 35);
+      ctx.fillText(`W:${this.body.wallBounces}/${this.maxWallBounces || 3}`, -this.radius, this.radius - 35);
     }
 
     ctx.restore();
@@ -736,14 +728,13 @@ class SvgSquare {
     this.img.onload = () => { this.loaded = true; };
 
     this.colliderBase = svgObj.collider.pts.map(p => {
-      // اگر p آبجکت {x,y} است
-      const scale = 0.85; // کمی کوچکتر
+      const scale = 0.85;
       return { x: (p.x - 50) * scale, y: (p.y - 50) * scale };
     });
   }
   buildSquareCollider() {
     const half = this.size / 2;
-    const scale = 0.85; // می‌تونی عدد 0.8 تا 0.9 برای کمی کوچکتر بودن امتحان کنی
+    const scale = 0.85;
     this.squareColliderBase = [
       { x: -half * scale, y: -half * scale },
       { x: half * scale, y: -half * scale },
@@ -779,7 +770,6 @@ class SvgSquare {
     ctx.drawImage(this.img, -this.size / 2, -this.size / 2, this.size, this.size);
 
     if (showColliders) {
-      // کالیدر اصلی
       ctx.strokeStyle = "#18ed09";
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -790,7 +780,6 @@ class SvgSquare {
       ctx.closePath();
       ctx.stroke();
 
-      // کالیدر دوم با scale
       ctx.strokeStyle = "#18ed09";
       ctx.lineWidth = 0.6;
       const scale = 1.3;
@@ -804,10 +793,9 @@ class SvgSquare {
       ctx.closePath();
       ctx.stroke();
 
-      // متن wallBounces
       ctx.fillStyle = "#ffffff";
       ctx.font = "12px Arial";
-      ctx.fillText(`W:${this.wallBounces || 0}/${this.maxWallBounces || 3}`, -this.radius, this.radius + 25);
+      ctx.fillText(`W:${this.body.wallBounces}/${this.maxWallBounces || 3}`, -this.radius, this.radius + 25);
 
     }
 
@@ -833,7 +821,6 @@ class SvgTriangle {
     this.restitution = opts.restitution ?? 0.8;
     this.wallBounces = 0;
 
-    // از svgmaker بخوان
     this.buildSVG();
     this.buildCollider();
 
@@ -871,15 +858,13 @@ class SvgTriangle {
     this.img.src = "data:image/svg+xml;base64," + svg64;
     this.img.onload = () => { this.loaded = true; };
 
-    // کالیدر از svgObj بگیریم
     this.colliderBase = svgObj.collider.pts.map(p => {
-      const [x, y] = [p.x, p.y]; // اینجا دیگه split لازم نیست چون mkPolyFromPoints آرایه داده
+      const [x, y] = [p.x, p.y];
       return { x: x - 50, y: y - 50 };
     });
   }
 
   buildCollider() {
-    // کالیدر scale شده هم اضافه می‌کنیم
     this.colliderScale = this.colliderBase.map(p => ({ x: p.x * 1.3, y: p.y * 1.3 }));
   }
 
@@ -910,7 +895,6 @@ class SvgTriangle {
     ctx.drawImage(this.img, -this.size / 2, -this.size / 2, this.size, this.size);
 
     if (showColliders) {
-      // کالیدر اصلی
       ctx.strokeStyle = "#18ed09";
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -921,7 +905,6 @@ class SvgTriangle {
       ctx.closePath();
       ctx.stroke();
 
-      // کالیدر scale شده
       ctx.strokeStyle = "#18ed09";
       ctx.lineWidth = 0.6;
       ctx.beginPath();
@@ -932,11 +915,10 @@ class SvgTriangle {
       ctx.closePath();
       ctx.stroke();
 
-      // متن wallBounces
       ctx.fillStyle = "#ffffff";
       ctx.font = "12px Arial";
       ctx.fillText(
-        `W:${this.wallBounces || 0}/${this.maxWallBounces || 3}`,
+        `W:${this.body.wallBounces}/${this.maxWallBounces || 3}`,
         -this.radius,
         this.radius + 25
       );
@@ -983,7 +965,6 @@ class SvgOctagon {
   get radius() { return this.size / 2; }
 
   buildSVG() {
-    // از svgmaker برای ساخت لوزی استفاده می‌کنیم
     const svgObj = svgmaker.mkDiamond({
       stroke: this.borderColor,
       fill: this.fillColor,
@@ -1004,14 +985,14 @@ class SvgOctagon {
   }
 
   buildCollider() {
-    const half = this.size / 2;          // نصف سایز تصویر
-    const scale = 0.95;                  // مقیاس کوچکتر برای کالیدر
-    const adjustedHalf = half * scale;   // نصف سایز ضرب در مقیاس
+    const half = this.size / 2;
+    const scale = 0.95;
+    const adjustedHalf = half * scale;
     this.colliderBase = [
-      { x: 0, y: -adjustedHalf },  // راس بالا
-      { x: adjustedHalf, y: 0 },             // گوشه راست
-      { x: 0, y: adjustedHalf },  // راس پایین
-      { x: -adjustedHalf, y: 0 }              // گوشه چپ
+      { x: 0, y: -adjustedHalf },
+      { x: adjustedHalf, y: 0 },
+      { x: 0, y: adjustedHalf },
+      { x: -adjustedHalf, y: 0 }
     ];
   }
 
@@ -1043,7 +1024,6 @@ class SvgOctagon {
     ctx.drawImage(this.img, -this.size / 2, -this.size / 2, this.size, this.size);
 
     if (showColliders) {
-      // کالیدر اصلی
       ctx.strokeStyle = "#18ed09";
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -1054,7 +1034,6 @@ class SvgOctagon {
       ctx.closePath();
       ctx.stroke();
 
-      // کالیدر دوم با scale
       ctx.strokeStyle = "#18ed09";
       ctx.lineWidth = 0.6;
       const scale = 1.3;
@@ -1068,11 +1047,10 @@ class SvgOctagon {
       ctx.closePath();
       ctx.stroke();
 
-      // متن wallBounces
       ctx.fillStyle = "#ffffff";
       ctx.font = "12px Arial";
       ctx.fillText(
-        `W:${this.wallBounces || 0}/${this.maxWallBounces || 3}`,
+        `W:${this.body.wallBounces}/${this.maxWallBounces || 3}`,
         -this.radius,
         this.radius - 25
       );
@@ -1099,8 +1077,7 @@ class SvgRegularPolygonShape {
     this.borderColor = opts.borderColor || "#ff0000";
     this.restitution = opts.restitution ?? 0.8;
     this.wallBounces = 0;
-    this.n = n; // تعداد اضلاع
-
+    this.n = n;
     this.buildSVG();
     this.buildCollider();
 
@@ -1119,7 +1096,7 @@ class SvgRegularPolygonShape {
 
   get radius() { return this.size / 2; }
   buildSVG() {
-    const radius = this.size / 2 * 0.35; // کمی margin برای stroke
+    const radius = this.size / 2 * 0.35;
     const svgObj = svgmaker.mkRegularPolygon(this.n, {
       radius,
       stroke: this.borderColor,
@@ -1138,10 +1115,9 @@ class SvgRegularPolygonShape {
     this.img.src = "data:image/svg+xml;base64," + svg64;
     this.img.onload = () => { this.loaded = true; };
 
-    // کالیدر هم نسبت به size تعریف میشه
     this.colliderBase = svgObj.collider.pts.map(p => {
       const [x, y] = p.split(",").map(Number);
-      const scale = this.size / 100 + 0.17; // نسبت اندازه واقعی به سایز پیشفرض
+      const scale = this.size / 100 + 0.17;
       return { x: (x - 50) * scale, y: (y - 50) * scale };
     });
   }
@@ -1178,7 +1154,6 @@ class SvgRegularPolygonShape {
     ctx.drawImage(this.img, -this.size / 2, -this.size / 2, this.size, this.size);
 
     if (showColliders) {
-      // کالیدر اصلی
       ctx.strokeStyle = "#18ed09";
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -1189,7 +1164,6 @@ class SvgRegularPolygonShape {
       ctx.closePath();
       ctx.stroke();
 
-      // کالیدر دوم با scale
       ctx.strokeStyle = "#18ed09";
       ctx.lineWidth = 0.6;
       const scale = 1.3;
@@ -1203,11 +1177,10 @@ class SvgRegularPolygonShape {
       ctx.closePath();
       ctx.stroke();
 
-      // متن wallBounces
       ctx.fillStyle = "#ffffff";
       ctx.font = "12px Arial";
       ctx.fillText(
-        `W:${this.wallBounces || 0}/${this.maxWallBounces || 3}`,
+        `W:${this.body.wallBounces}/${this.maxWallBounces || 3}`,
         -this.radius,
         this.radius + 25
       );
