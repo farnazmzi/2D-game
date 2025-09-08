@@ -15,10 +15,10 @@ function drawWalls() {
   let gradRight = ctx.createLinearGradient(canvas.width, 0, canvas.width, canvas.height);
   colors.forEach((c, i) => gradRight.addColorStop(i / (colors.length - 1), c));
 
-  ctx.fillStyle = gradTop;    ctx.fillRect(0, 0, canvas.width, thickness);
+  ctx.fillStyle = gradTop; ctx.fillRect(0, 0, canvas.width, thickness);
   ctx.fillStyle = gradBottom; ctx.fillRect(0, canvas.height - thickness, canvas.width, thickness);
-  ctx.fillStyle = gradLeft;   ctx.fillRect(0, 0, thickness, canvas.height);
-  ctx.fillStyle = gradRight;  ctx.fillRect(canvas.width - thickness, 0, thickness, canvas.height);
+  ctx.fillStyle = gradLeft; ctx.fillRect(0, 0, thickness, canvas.height);
+  ctx.fillStyle = gradRight; ctx.fillRect(canvas.width - thickness, 0, thickness, canvas.height);
 }
 
 function handleWalls(body) {
@@ -49,13 +49,13 @@ function handleWalls(body) {
     if (hitWall) {
       Matter.Body.setVelocity(body, { x: vx, y: vy });
       body.wallBounces++;
-  if (body.svgShape) {
-    body.svgShape.wallBounces = body.wallBounces;
-  }
+      if (body.svgShape) {
+        body.svgShape.wallBounces = body.wallBounces;
+      }
     }
 
     if (body.wallBounces >= body.maxWallBounces) {
-      body.hitMaxBounces = true; 
+      body.hitMaxBounces = true;
     }
   }
 
@@ -63,8 +63,8 @@ function handleWalls(body) {
   const marginY = canvas.height * 0.22;
   if (body.hitMaxBounces) {
     if (px < -marginX || px > canvas.width + marginX ||
-        py < -marginY || py > canvas.height + marginY) {
-      body.outOfBounds = true; 
+      py < -marginY || py > canvas.height + marginY) {
+      body.outOfBounds = true;
     }
   }
 }

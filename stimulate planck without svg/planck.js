@@ -1,26 +1,20 @@
- // ===================== برخورد SAT =====================
 
     
     function getSvgLetterCorners(svg) {
-      // کادر دقیقِ بیرونی (outer) با احتساب استروک و outline، سپس اعمال چرخش
       const angle = svg.angle || 0;
       const c = Math.cos(angle);
       const s = Math.sin(angle);
 
-      // ابعاد رندر‌شده (بدون استروک)
       const w = (svg.width ?? 80);
       const h = (svg.height ?? 80);
 
-      // پارامترهای استروک / outline
-      const strokeWidth = svg.strokeWidth || 0;      // ضخامت استروک
-      const outlinePx = svg.outlinePx || 0;      // اگر بیرون‌خط اضافی داری
+      const strokeWidth = svg.strokeWidth || 0;     
+      const outlinePx = svg.outlinePx || 0;     
       const strokeAlign = svg.strokeAlign || 'center'; // 'center' | 'inner' | 'outer'
       const lineJoin = svg.strokeLinejoin || 'miter'; // 'miter' | 'round' | 'bevel'
       const miterLimit = Math.max(1, svg.miterLimit || 4);
 
-      // چقدر باید «بیرون» نفوذ کنیم تا لبه‌ی بیرونیِ نقاشی رو بگیریم؟
-      // برای center نصف ضخامت بیرون می‌زند، برای outer کل ضخامت بیرونه، برای inner بیرونی نداریم.
-      let outward = 0;
+     let outward = 0;
       const totalStroke = strokeWidth + outlinePx;
 
       if (strokeAlign === 'outer') {
@@ -30,28 +24,20 @@
       } else /* inner */ {
         outward = 0;
       }
-
-      // اگر lineJoin = miter باشه، نوک گوشه‌ها می‌تونه بیشتر از نصف استروک بیرون بزنه.
-      // بر اساس تعریف SVG، حداکثر طول miter نسبت به half-stroke برابر miterLimit هست.
-      // پس افزایشِ اضافیِ بیرونی را سقف می‌گذاریم به:
-      // extra = (miterLimit - 1) * halfStroke
       if (lineJoin === 'miter' && totalStroke > 0) {
         const half = totalStroke * (strokeAlign === 'outer' ? 1 : 0.5);
         const extra = (miterLimit - 1) * half;
         outward = Math.max(outward, half + extra);
       }
 
-      // نیم‌بعدها با احتساب بیرونی‌ترین مرز نقاشی
       const hw = w * 0.5 + outward;
       const hh = h * 0.5 + outward;
 
-      // گوشه‌های کادر بیرونی در مختصات محلی
       const pts = [
         { x: -hw, y: -hh }, { x: hw, y: -hh },
         { x: hw, y: hh }, { x: -hw, y: hh }
       ];
 
-      // اعمال چرخش و انتقال به (svg.x, svg.y)
       return pts.map(p => ({
         x: svg.x + p.x * c - p.y * s,
         y: svg.y + p.x * s + p.y * c
@@ -106,7 +92,7 @@
     function getStarCorners(star) {
       const corners = [];
       const step = Math.PI / star.spikes;
-      const strokePadding = (star.lineWidth || 2) / 2; // ضخامت بوردر
+      const strokePadding = (star.lineWidth || 2) / 2; 
 
       for (let i = 0; i < star.spikes * 2; i++) {
         const r = (i % 2 === 0 ? star.radius : star.radius / 2) + strokePadding + 4;
@@ -231,7 +217,6 @@
                 normal = { x: dx / d, y: dy / d };
                 penetration = sumR - d;
 
-                // تصحیح موقعیت بدون تقسیم بر جرم و بدون slop
                 const correctionX = normal.x * penetration * 0.5;
                 const correctionY = normal.y * penetration * 0.5;
                 A.x -= correctionX;
@@ -264,14 +249,13 @@
 
                 if (overlap <= 0) {
                   minPenetration = 0;
-                  break; // هیچ برخوردی وجود نداره
+                  break; 
                 }
 
                 if (overlap < minPenetration) {
                   minPenetration = overlap;
                   bestAxis = axis;
 
-                  // پیدا کردن نقاط تماس واقعی نزدیک به محور نفوذ
                   contactPoints = [];
                   for (const pA of cornersA) {
                     const proj = pA.x * axis.x + pA.y * axis.y;
@@ -292,7 +276,6 @@
                 normal = { ...bestAxis };
                 penetration = minPenetration;
 
-                // میانگین نقاط تماس واقعی به جای مرکز
                 if (contactPoints.length) {
                   let cx = 0, cy = 0;
                   contactPoints.forEach(p => { cx += p.x; cy += p.y; });
@@ -301,7 +284,6 @@
                   contactPoint = { x: (A.x + B.x) / 2, y: (A.y + B.y) / 2 };
                 }
 
-                // اطمینان از جهت نرمال
                 const AB = { x: B.x - A.x, y: B.y - A.y };
                 if (dot(normal, AB) < 0) { normal.x *= -1; normal.y *= -1; }
               } else continue;
@@ -317,7 +299,6 @@
               const corners = getSquareCorners(square);
               const axes = getAxes(corners);
 
-              // پیدا کردن نزدیک‌ترین نقطه دایره به مربع
               let closest = (typeof getClosestPointOnRotatedSquare === "function")
                 ? getClosestPointOnRotatedSquare(circle, square)
                 : fallbackClosestPointOnPoly({ x: circle.x, y: circle.y }, corners);
@@ -337,7 +318,7 @@
                 const minC = projC - circle.radiusWithStroke;
                 const maxC = projC + circle.radiusWithStroke;
 
-                const overlap = Math.min(maxP, maxC) - Math.max(minP, minC) - 4; // 0.5: margin برای جلوگیری از چسبیدن بیش از حد
+                const overlap = Math.min(maxP, maxC) - Math.max(minP, minC) - 4; 
                 if (overlap <= 0) {
                   minPenetration = 0;
                   break;
@@ -353,7 +334,6 @@
                 penetration = minPenetration;
                 contactPoint = { ...closest };
 
-                // اطمینان از جهت normal: از Circle به Square
                 const AB = { x: square.x - circle.x, y: square.y - circle.y };
                 if (dot(normal, AB) < 0) { normal.x *= -1; normal.y *= -1; }
               } else continue;
@@ -391,9 +371,8 @@
                 const maxC = projC + circle.radiusWithStroke;
 
                 let margin = 0;
-                // فقط Star-Circle فاصله امن
                 if (poly.type === "Star" && circle.type === "Circle" && ((poly.type === "Star" && circle.type === "Circle"))) {
-                  margin = 0; // دایره-ستاره: میخوای فاصله نداشته باشه
+                  margin = 0; 
                 }
 
                 const o = Math.min(maxP + margin, maxC) - Math.max(minP - margin, minC);

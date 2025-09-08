@@ -3,7 +3,7 @@
 
       let corners = [];
       if (shape.radius) {
-        const padding = 1; // یا حتی shape.borderWidth / 2
+        const padding = 1; 
         corners = [
           { x: shape.x - (shape.radius + padding), y: shape.y - (shape.radius + padding) },
           { x: shape.x + (shape.radius + padding), y: shape.y + (shape.radius + padding) }
@@ -49,7 +49,6 @@
       if (shape.wallBounces === undefined) shape.wallBounces = 0;
       if (shape.maxWallBounces === undefined) shape.maxWallBounces = maxWallBounces;
 
-      // فقط وقتی کمتر از maxWallBounces هست، برگرداندن اعمال شود
       if (shape.wallBounces < shape.maxWallBounces) {
         let bounced = false;
 
@@ -79,9 +78,7 @@
 
         if (bounced) shape.wallBounces++;
       } else {
-        // بعد از سه بونس، اجازه بده از صفحه خارج شود
         shape.inside = false;
-        // حذف وقتی 20٪ از مرز خارج شد
         const marginX = canvas.width * 0.2;
         const marginY = canvas.height * 0.2;
 
@@ -89,7 +86,7 @@
           shape.x < -marginX || shape.x > canvas.width + marginX ||
           shape.y < -marginY || shape.y > canvas.height + marginY
         ) {
-          shape.remove = true; // پرچم حذف
+          shape.remove = true; 
         }
       }
 
@@ -98,28 +95,22 @@
 
     }
     function drawWalls() {
-      const thickness = 3; // ضخامت دیوار
+      const thickness = 3; 
 
-      // تعریف رنگ‌ها
       const colors = ['purple', 'green', 'blue', 'lightgray', '#004080', '#f36ddb', 'red'];
 
-      // گرادینت بالا
       let gradTop = ctx.createLinearGradient(0, 0, canvas.width, 0);
       colors.forEach((c, i) => gradTop.addColorStop(i / (colors.length - 1), c));
 
-      // گرادینت پایین
       let gradBottom = ctx.createLinearGradient(0, canvas.height, canvas.width, canvas.height);
       colors.forEach((c, i) => gradBottom.addColorStop(i / (colors.length - 1), c));
 
-      // گرادینت چپ
       let gradLeft = ctx.createLinearGradient(0, 0, 0, canvas.height);
       colors.forEach((c, i) => gradLeft.addColorStop(i / (colors.length - 1), c));
 
-      // گرادینت راست
       let gradRight = ctx.createLinearGradient(canvas.width, 0, canvas.width, canvas.height);
       colors.forEach((c, i) => gradRight.addColorStop(i / (colors.length - 1), c));
 
-      // رسم دیوارها
       ctx.fillStyle = gradTop;
       ctx.fillRect(0, 0, canvas.width, thickness);
 

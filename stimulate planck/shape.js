@@ -252,14 +252,12 @@ class Circle {
     this.entrySide = entrySide;
     this.birth = performance.now() / 1000;
     this.angle = 0;
-    this.angVel = (Math.random() * 2 - 1) * Math.PI / 180;  // سرعت زاویه‌ای اولیه
+    this.angVel = (Math.random() * 2 - 1) * Math.PI / 180;  
 
-    // برخورد و دیوار
     this.wallBounces = 0;
     this.maxWallBounces = 3;
     this.collisionsEnabled = true;
 
-    // وضعیت زندگی و ورود/خروج
     this.inField = false;
     this.entering = true;
     this.leaving = false;
@@ -267,14 +265,13 @@ class Circle {
 
   }
   get radius() {
-    return circleRadius;  // ← همیشه از global می‌خونه
+    return circleRadius;  
   }
   draw(ctx) {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.angle);
 
-    // خود دایره
     ctx.beginPath();
     ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
     ctx.fillStyle = "gray";
@@ -284,21 +281,18 @@ class Circle {
     ctx.stroke();
 
     if (showColliders) {
-      // حلقه اول
       ctx.beginPath();
       ctx.arc(0, 0, this.radiusWithStroke, 0, Math.PI * 2);
       ctx.strokeStyle = this.leaving ? "#18ed09" : (this.entering ? "#18ed09" : "#18ed09");
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      // حلقه دوم (بزرگتر)
       ctx.beginPath();
       ctx.arc(0, 0, this.radiusWithStroke + 5, 0, Math.PI * 2);
       ctx.strokeStyle = ctx.strokeStyle;
       ctx.lineWidth = 1;
       ctx.stroke();
 
-      // متن
       ctx.fillStyle = "#ffffff";
       ctx.font = "12px Arial";
       ctx.fillText(`W:${this.wallBounces}/${this.maxWallBounces}`, -this.radius, this.radius + 15);
@@ -340,7 +334,7 @@ class Square {
     this.entrySide = entrySide;
     this.birth = performance.now() / 1000;
     this.angle = 0;
-    this.angVel = (Math.random() * 2 - 1) * Math.PI / 180;  // سرعت زاویه‌ای اولیه
+    this.angVel = (Math.random() * 2 - 1) * Math.PI / 180;  
 
     this.wallBounces = 0;
     this.maxWallBounces = 3;
@@ -354,7 +348,7 @@ class Square {
 
 
   get size() {
-    return squareSize;  // ← همیشه از global می‌خونه
+    return squareSize;  
   }
   draw(ctx) {
     ctx.save();
@@ -371,21 +365,18 @@ class Square {
     if (showColliders) {
       ctx.strokeStyle = this.leaving ? "#18ed09" : (this.entering ? "#18ed09" : "#18ed09");
 
-      // حلقه اول
       ctx.lineWidth = 2;
       ctx.strokeRect(-this.size / 2 - this.strokeWidth,
         -this.size / 2 - this.strokeWidth,
         this.size + this.strokeWidth * 2,
         this.size + this.strokeWidth * 2);
 
-      // حلقه دوم (بزرگتر)
       ctx.lineWidth = 1;
       ctx.strokeRect(-this.size / 2 - this.strokeWidth - 5,
         -this.size / 2 - this.strokeWidth - 5,
         this.size + this.strokeWidth * 2 + 10,
         this.size + this.strokeWidth * 2 + 10);
 
-      // متن
       ctx.fillStyle = "#ffffff";
       ctx.font = "12px Arial";
       ctx.fillText(`W:${this.wallBounces}/${this.maxWallBounces}`, -this.size / 2, this.size / 2 + 20);
@@ -439,10 +430,8 @@ class SvgStar {
     this.birth = performance.now() / 1000;
     this.spikes = opts.spikes || 5;
 
-    // SVG اولیه را با گلوبال shapeSize می‌سازیم
     this.buildSVG();
     this.buildStarColliderOffsets();
-    // سرعت به سمت مرکز
     const cx = canvas.width / 2;
     const cy = canvas.height / 2;
     let dx = cx - this.x;
@@ -455,16 +444,14 @@ class SvgStar {
     this.vy = dy * SPEED_FACTOR;
   }
 
-  // getter برای سایز و radius
   get size() {
-    return shapeSize;      // همیشه از global می‌خونه
+    return shapeSize;    
   }
 
   get radius() {
     return this.size / 2;
   }
 
-  // تابع ساخت SVG با سایز فعلی
   buildSVG() {
     const svgObj = svgmaker.mkStar5({
       stroke: this.borderColor,
@@ -474,7 +461,6 @@ class SvgStar {
     });
     this.svg = svgObj.svg;
 
-    // کالیدر
     const step = Math.PI / this.spikes;
     this.collider = [];
     for (let i = 0; i < this.spikes * 2; i++) {
@@ -483,7 +469,6 @@ class SvgStar {
       this.collider.push({ x: r * Math.cos(a), y: r * Math.sin(a) });
     }
 
-    // تبدیل SVG به Image
     const parser = new DOMParser();
     const doc = parser.parseFromString(this.svg, "image/svg+xml");
     const xml = new XMLSerializer().serializeToString(doc.documentElement);
@@ -495,10 +480,9 @@ class SvgStar {
   }
 
 
-  // ۱) ساخت کالیدر خام (۱۰ نقطه ستاره)
   buildStarColliderBase() {
     this.starColliderBase = [];
-    const step = Math.PI / this.spikes; // زاویه بین نقاط
+    const step = Math.PI / this.spikes;
     for (let i = 0; i < this.spikes * 2; i++) {
       const r = (i % 2 === 0) ? this.radius + this.strokeWidth : (this.radius / 2) + this.strokeWidth;
       const a = i * step;
@@ -518,10 +502,10 @@ class SvgStar {
       const innerOffset = 20 * (this.size / baseSize);
 
       let px, py;
-      if (i % 2 === 1) { // داخلی
+      if (i % 2 === 1) { 
         px = (r - innerOffset) * Math.cos(angle);
         py = (r - innerOffset) * Math.sin(angle);
-      } else { // بیرونی (نمایشی)
+      } else {
         px = (r - outerOffset) * Math.cos(angle);
         py = (r - outerOffset) * Math.sin(angle);
       }
@@ -531,7 +515,6 @@ class SvgStar {
 
   }
 
-  // ۳) گرفتن نقاط آفست در دستگاه جهانی
   getStarColliderWorld() {
     if (!this.starColliderOffset) this.buildStarColliderOffsets();
 
@@ -544,7 +527,6 @@ class SvgStar {
     }));
   }
 
-  // ۴) شکستن ستاره به ۵ مثلث محدب
   getStarConvexPolys() {
     const world = this.getStarColliderWorld();
     if (!world || world.length < 10) return [];
@@ -568,7 +550,6 @@ class SvgStar {
     ctx.translate(this.x, this.y);
     ctx.rotate(this.angle);
 
-    // رسم ستاره
     ctx.drawImage(this.img, -this.size / 2, -this.size / 2, this.size, this.size);
 
     if (showColliders) {
@@ -582,21 +563,6 @@ class SvgStar {
       ctx.closePath();
       ctx.stroke();
 
-
-      // ===== حلقه دوم نمایشی =====
-      // ctx.lineWidth = 0.6;
-      // ctx.beginPath();
-      // const scale = 1.5; // ضریب بزرگنمایی
-
-      // this.starColliderOffset.forEach((p, i) => {
-      //   const x = p.x * scale;
-      //   const y = p.y * scale;
-
-      //   if (i === 0) ctx.moveTo(x, y);
-      //   else ctx.lineTo(x, y);
-      // });
-      // ctx.closePath();
-      // ctx.stroke();
 
 
 
@@ -635,7 +601,7 @@ SvgStar.prototype.getCorners = function () {
 };
 
 SvgStar.prototype.getStarConvexPolys = function () {
-  const pts = this.getCorners(); // همون 10 نقطه
+  const pts = this.getCorners();
   const cx = this.x;
   const cy = this.y;
 
@@ -644,7 +610,7 @@ SvgStar.prototype.getStarConvexPolys = function () {
     const p1 = pts[i];
     const p2 = pts[(i + 1) % pts.length];
     polys.push([
-      { x: cx, y: cy }, // مرکز
+      { x: cx, y: cy }, 
       p1,
       p2
     ]);
@@ -666,7 +632,7 @@ function getStarPolys(shape) {
 
 
 
-let shapeCounter = 0; // بیرون از تابع تعریف کن (global)
+let shapeCounter = 0; 
 
 
 function tryGenerateShape() {
@@ -688,12 +654,11 @@ function tryGenerateShape() {
     sy = canvas.height + canvas.height * offset;
   }
 
-  // فقط SvgStar بساز
   let shape = new SvgStar(sx, sy, {
     entrySide: side,
-    strokeWidth: 7,        // اختیاری
-    fillColor: 'yellow',   // اختیاری
-    borderColor: 'orange'  // اختیاری
+    strokeWidth: 7,       
+    fillColor: 'yellow',   
+    borderColor: 'orange' 
   });
 
   shapeCounter++;
@@ -717,7 +682,7 @@ function removeShape(shape) {
   const index = shapes.indexOf(shape);
   if (index !== -1) {
     shapes.splice(index, 1);
-    remainedShapes--; // هر بار حذف شد
+    remainedShapes--; 
   }
 }
 
@@ -727,7 +692,7 @@ function generateShapesWithDelay(count, delay) {
   function generateNext() {
     if (i >= count) return;
 
-    const outside = Math.random() < 0.2; // 20% بیرون
+    const outside = Math.random() < 0.2; 
     const sh = addShape(outside);
     if (sh) {
       shapes.push(sh);
@@ -746,9 +711,8 @@ function generateShapesWithDelay(count, delay) {
 
 
 function updateShapeSize() {
-  // فرض کنیم اندازه پایه برای 1000px عرض است
   const baseSize = 100;
-  const scale = canvas.width / 1000;  // نسبت فعلی به اندازه پایه
+  const scale = canvas.width / 1000;  
   shapeSize = baseSize * scale;
 }
 
@@ -757,7 +721,6 @@ function updateShapesOnResize() {
   const cy = canvas.height / 2;
 
   for (const s of shapes) {
-    // تغییر سرعت برای هماهنگی با اندازه جدید
     let dx = cx - s.x;
     let dy = cy - s.y;
     const dist = Math.hypot(dx, dy) || 1;

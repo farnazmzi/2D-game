@@ -11,14 +11,12 @@
         this.entrySide = entrySide;
         this.birth = performance.now() / 1000;
         this.angle = 0;
-        this.angVel = (Math.random() * 2 - 1) * Math.PI / 180;  // سرعت زاویه‌ای اولیه
+        this.angVel = (Math.random() * 2 - 1) * Math.PI / 180;  
 
-        // برخورد و دیوار
         this.wallBounces = 0;
         this.maxWallBounces = 3;
         this.collisionsEnabled = true;
 
-        // وضعیت زندگی و ورود/خروج
         this.inField = false;
         this.entering = true;
         this.leaving = false;
@@ -26,14 +24,13 @@
 
       }
       get radius() {
-        return circleRadius;  // ← همیشه از global می‌خونه
+        return circleRadius;  
       }
       draw(ctx) {
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(this.angle);
 
-        // خود دایره
         ctx.beginPath();
         ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
         ctx.fillStyle = "gray";
@@ -43,21 +40,18 @@
         ctx.stroke();
 
         if (showColliders) {
-          // حلقه اول
           ctx.beginPath();
           ctx.arc(0, 0, this.radiusWithStroke, 0, Math.PI * 2);
           ctx.strokeStyle = this.leaving ? "#18ed09" : (this.entering ? "#18ed09" : "#18ed09");
           ctx.lineWidth = 2;
           ctx.stroke();
 
-          // حلقه دوم (بزرگتر)
           ctx.beginPath();
           ctx.arc(0, 0, this.radiusWithStroke + 5, 0, Math.PI * 2);
           ctx.strokeStyle = ctx.strokeStyle;
           ctx.lineWidth = 1;
           ctx.stroke();
 
-          // متن
           ctx.fillStyle = "#ffffff";
           ctx.font = "12px Arial";
           ctx.fillText(`W:${this.wallBounces}/${this.maxWallBounces}`, -this.radius, this.radius + 15);
@@ -99,7 +93,7 @@
         this.entrySide = entrySide;
         this.birth = performance.now() / 1000;
         this.angle = 0;
-        this.angVel = (Math.random() * 2 - 1) * Math.PI / 180;  // سرعت زاویه‌ای اولیه
+        this.angVel = (Math.random() * 2 - 1) * Math.PI / 180; 
 
         this.wallBounces = 0;
         this.maxWallBounces = 3;
@@ -113,7 +107,7 @@
 
 
       get size() {
-        return squareSize;  // ← همیشه از global می‌خونه
+        return squareSize; 
       }
       draw(ctx) {
         ctx.save();
@@ -130,21 +124,18 @@
         if (showColliders) {
           ctx.strokeStyle = this.leaving ? "#18ed09" : (this.entering ? "#18ed09" : "#18ed09");
 
-          // حلقه اول
           ctx.lineWidth = 2;
           ctx.strokeRect(-this.size / 2 - this.strokeWidth,
             -this.size / 2 - this.strokeWidth,
             this.size + this.strokeWidth * 2,
             this.size + this.strokeWidth * 2);
 
-          // حلقه دوم (بزرگتر)
           ctx.lineWidth = 1;
           ctx.strokeRect(-this.size / 2 - this.strokeWidth - 5,
             -this.size / 2 - this.strokeWidth - 5,
             this.size + this.strokeWidth * 2 + 10,
             this.size + this.strokeWidth * 2 + 10);
 
-          // متن
           ctx.fillStyle = "#ffffff";
           ctx.font = "12px Arial";
           ctx.fillText(`W:${this.wallBounces}/${this.maxWallBounces}`, -this.size / 2, this.size / 2 + 20);
@@ -180,18 +171,18 @@
         this.name = 'Star';
         this.x = x;
         this.y = y;
-        this.spikes = 5;     // تعداد نوک‌ها
+        this.spikes = 5;   
         this.vx = vx;
         this.vy = vy;
         this.angle = 0;
-        this.angVel = (Math.random() * 2 - 1) * Math.PI / 180;  // سرعت زاویه‌ای اولیه
+        this.angVel = (Math.random() * 2 - 1) * Math.PI / 180; 
         this.fillColor = fillColor;
         this.borderColor = borderColor;
         this.entrySide = entrySide;
         this.birth = performance.now() / 1000;
-        this.wallBounces = 0;     // تعداد برخورد با دیوار
-        this.maxWallBounces = 3;  // مقدار پیش‌فرض، بعداً می‌تونی از config بگیری
-        this.collisionsEnabled = true; // روشن/خاموش بودن برخورد
+        this.wallBounces = 0;    
+        this.maxWallBounces = 3; 
+        this.collisionsEnabled = true; 
         this.strokeWidth = strokeWidth;
         this.inField = false;
         this.entering = true;
@@ -210,7 +201,6 @@
         ctx.translate(this.x, this.y);
         ctx.rotate(this.angle);
 
-        // --- شکل اصلی ---
         ctx.beginPath();
         for (let i = 0; i < this.spikes * 2; i++) {
           const r = i % 2 === 0 ? this.radius : this.radius / 2;
@@ -230,7 +220,6 @@
           const step = Math.PI / this.spikes;
           ctx.strokeStyle = this.leaving ? "#18ed09" : (this.entering ? "#18ed09" : "#18ed09");
 
-          // حلقه اول
           ctx.beginPath();
           for (let i = 0; i < this.spikes * 2; i++) {
             const r = i % 2 === 0 ? this.radius + this.strokeWidth : (this.radius / 2) + this.strokeWidth;
@@ -244,7 +233,6 @@
           ctx.lineWidth = 2;
           ctx.stroke();
 
-          // حلقه دوم (بزرگتر)
           ctx.beginPath();
           for (let i = 0; i < this.spikes * 2; i++) {
             const r = i % 2 === 0 ? this.radius + this.strokeWidth + 5 : (this.radius / 2) + this.strokeWidth + 6;
@@ -258,7 +246,6 @@
           ctx.lineWidth = 1;
           ctx.stroke();
 
-          // متن
           ctx.fillStyle = "#ffffff";
           ctx.font = "12px Arial";
           ctx.fillText(`W:${this.wallBounces}/${this.maxWallBounces}`, -this.radius, this.radius + 20);
@@ -284,7 +271,6 @@
         const marginX = canvas.width * 0.2;
         const marginY = canvas.height * 0.2;
 
-        // تعیین مختصات اولیه طبق سمت
         if (side === 'left') { this.x = -marginX - Math.random() * 40; this.y = Math.random() * canvas.height; }
         else if (side === 'right') { this.x = canvas.width + marginX + Math.random() * 40; this.y = Math.random() * canvas.height; }
         else if (side === 'top') { this.y = -marginY - Math.random() * 40; this.x = Math.random() * canvas.width; }
@@ -298,13 +284,11 @@
         this.entrySide = side;
         this.loaded = false;
 
-        // Velocity به سمت مرکز
         const cx = canvas.width / 2, cy = canvas.height / 2;
         const dx = cx - this.x, dy = cy - this.y, d = Math.hypot(dx, dy) || 1;
         this.vx = dx / d * speed;
         this.vy = dy / d * speed;
 
-        // تبدیل SVG به Image
         const parser = new DOMParser();
         const doc = parser.parseFromString(svgString, "image/svg+xml");
         const xml = new XMLSerializer().serializeToString(doc.documentElement);
@@ -380,7 +364,6 @@
         this.restitution = restitution;
         this.bounceCount = 0;
 
-        // جرم و ممان اینرسی ساده برای مثلث متساوی‌الاضلاع
         this.mass = 1;
         this.invMass = 1 / this.mass;
         this.inertia = (this.mass * this.size * this.size) / 12;
@@ -390,11 +373,10 @@
     getVertices() {
         const h = (Math.sqrt(3) / 2) * this.size;
         const vertices = [
-            { x: 0, y: -h / 2 },                  // رأس بالا
-            { x: -this.size / 2, y: h / 2 },      // پایین چپ
-            { x: this.size / 2, y: h / 2 }        // پایین راست
+            { x: 0, y: -h / 2 },                 
+            { x: -this.size / 2, y: h / 2 },      
+            { x: this.size / 2, y: h / 2 }      
         ];
-        // دوران بر اساس زاویه
         return vertices.map(v => ({
             x: this.x + v.x * Math.cos(this.angle) - v.y * Math.sin(this.angle),
             y: this.y + v.x * Math.sin(this.angle) + v.y * Math.cos(this.angle)

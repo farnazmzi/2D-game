@@ -30,6 +30,6 @@ function bindSlider(sliderId, valueId, variableName, step = 1, decimals = 0) {
 
 bindSlider("SizeSliderStart", "SizeValStart", "shapeSize");
 bindSlider("maxShapesSliderStart", "maxShapesValStart", "MAX_SHAPES");
-bindSlider("speedSliderStart", "speedValStart", "SPEED", 0.15, 2); // ← دو رقم اعشار
+bindSlider("speedSliderStart", "speedValStart", "SPEED", 0.15, 2);
 bindSlider("roundTimeSliderStart", "roundTimeValStart", "roundTime");
 bindSlider("maxWallBouncesSliderStart", "maxWallBouncesValStart", "maxWallBounces");

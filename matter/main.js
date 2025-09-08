@@ -101,11 +101,9 @@ function resizeCanvas() {
 const w = window.innerWidth;
   const h = window.innerHeight;
 
-  // سایز رندر واقعی
   canvas.width = w * DPR;
   canvas.height = h * DPR;
 
-  // سایز ظاهری
   canvas.style.width = w + "px";
   canvas.style.height = h + "px";
   MARGIN = Math.min(canvas.width, canvas.height) * 0.15;

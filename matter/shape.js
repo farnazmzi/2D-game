@@ -3,15 +3,14 @@ class BaseShape {
     this.angle = 0;
     this.x = x;
     this.y = y;
-
     this.wallBounces = 0;
     this.entrySide = opts.entrySide;
     this.canBounce = true;
-
     this.birth = performance.now() / 1000;
     this.spawnTime = getElapsedMs();
     this.time = (++idx) * SPAWN_INTERVAL_MS;
 
+    this.strokeWidth = opts.strokeWidth || 7;
     const cx = canvas.width / 2;
     const cy = canvas.height / 2;
     let dx = cx - this.x;
@@ -27,13 +26,8 @@ class BaseShape {
    get ageMs() {
     return getElapsedMs() - this.spawnTime;
   }
-    update() {
-    this.x += this.vx;
-    this.y += this.vy;
-  }
+
 }
-
-
 
 class SvgStar extends BaseShape{
   constructor(x, y, opts = {}) {
@@ -194,7 +188,6 @@ class SvgCircle extends BaseShape{
     this.name = "Circle";
     this.angVel = (Math.random() * 2 - 1) * Math.PI / 180;
 
-    this.strokeWidth = opts.strokeWidth || 7;
     this.fillColor = opts.fillColor || "lightblue";
     this.borderColor = opts.borderColor || "blue";
     this.bounceMode="realistic";
@@ -494,7 +487,7 @@ class GlyphLetter extends BaseShape{
 
     this.body.svgShape = this;
   }
-  get size() { return window.shapeSize >= 100 ? window.shapeSize - 10 : window.shapeSize; }
+  get size() { return window.shapeSize >= 100 ? window.shapeSize - 10 : window.shapeSize + 20; }
   get radius() { return this.size / 2; }
 
 

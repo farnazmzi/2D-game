@@ -18,8 +18,8 @@
 
     let wallsActive = false;
     const BORDER = 7;
-    let wallsStartTime = null; // زمان فعال شدن دیوارها
-    const WALL_BLOCK_DURATION = 50; // ثانیه
+    let wallsStartTime = null; 
+    const WALL_BLOCK_DURATION = 50; 
     let lastSpawnSide = null;
     let hoveredShape = null;
     let showColliders = false;
@@ -40,33 +40,10 @@
 
 
 
-
-
-
-
 function updatePhysics() {
   world.step(1/60); // 60fps
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    //collider
 
 
     const colliderBtn = document.getElementById('toggleCollider');
@@ -79,10 +56,7 @@ function updatePhysics() {
       generateShapesWithDelay(MAX_SHAPES, 300);
     }
 
-    // ===================== کلاس‌ها =====================
 
-
-    // ===================== توابع کمکی =====================
     function getRandomSide() {
       const sides = ["left", "right", "top", "bottom"];
       return sides[Math.floor(Math.random() * sides.length)];
@@ -93,7 +67,7 @@ function updatePhysics() {
 
 
 
-    let shapeCounter = 0; // بیرون از تابع تعریف کن (global)
+    let shapeCounter = 0; 
 
     function tryGenerateShape() {
       const side = getRandomSide();
@@ -155,7 +129,7 @@ function updatePhysics() {
       const index = shapes.indexOf(shape);
       if (index !== -1) {
         shapes.splice(index, 1);
-        remainedShapes--; // هر بار حذف شد
+        remainedShapes--; 
       }
     }
 
@@ -165,7 +139,7 @@ function updatePhysics() {
       function generateNext() {
         if (i >= count) return;
 
-        const outside = Math.random() < 0.2; // 20% بیرون
+        const outside = Math.random() < 0.2; 
         const sh = addShape(outside);
         if (sh) {
           shapes.push(sh);
@@ -180,7 +154,6 @@ function updatePhysics() {
       generateNext();
     }
 
-    // ===================== حلقه اصلی =====================
     function loop(now) {
       if (!started) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -189,11 +162,9 @@ function updatePhysics() {
       last = now;
 
       const currentTime = performance.now() / 1000;
-      // --- بررسی راند ---
       if (currentTime - lastRoundTime >= roundTime) {
         round++;
         lastRoundTime = currentTime;
-        // با هر راند جدید، دوباره اشکال تولید کن
 
         generateShapesWithDelay(MAX_SHAPES, 300);
         //delay 
@@ -246,7 +217,6 @@ function updatePhysics() {
     toggleCollider.style.display = 'none';
 
     startBtn.addEventListener('click', () => {
-      // مخفی کردن استارت پنل
       startBtn.style.display = 'none';
       liveBtn.style.display = 'block';
       controlPanel.style.display = 'none';
@@ -262,7 +232,7 @@ function updatePhysics() {
 
     liveBtn.addEventListener('click', () => {
       if (controlPanel.style.display === 'none' || controlPanel.style.display === '') {
-        controlPanel.style.display = 'block'; // یا grid یا هرچی استایل اصلیته
+        controlPanel.style.display = 'block'; 
       } else {
         controlPanel.style.display = 'none';
       }
@@ -276,17 +246,14 @@ function updatePhysics() {
       const slider = document.getElementById(sliderId);
       const valSpan = document.getElementById(valueId);
 
-      // مقدار اولیه رو به span و متغیر global اختصاص بده
       valSpan.innerText = slider.value;
       window[variableName] = parseFloat(slider.value);
 
-      // هر بار که اسلایدر تغییر کرد
       slider.addEventListener('input', () => {
         const newValue = parseFloat(slider.value);
-        valSpan.innerText = newValue;        // بروزرسانی عدد نمایش داده شده
-        window[variableName] = newValue;     // بروزرسانی متغیر global
+        valSpan.innerText = newValue;        
+        window[variableName] = newValue;     
 
-        // فقط برای تست: چاپ همه متغیرهای اصلی
         console.log(
           "circleRadius =", circleRadius,
           "squareSize =", squareSize,
@@ -313,16 +280,15 @@ function updatePhysics() {
     function startGame() {
 
       ensureInitial();
-      shapes = [];       // ← همه شکل‌های قدیمی پاک بشن
+      shapes = [];      
       totalShapes = 0;
       remainedShapes = 0;
       SPEED = 0;
       console.log("circleRadius=", circleRadius, "squareSize=", squareSize, "starRadius=", starRadius);
 
-      // --- شروع حلقه ---
       started = true;
       last = performance.now();
-      lastRoundTime = performance.now() / 1000; // ریست زمان راند
+      lastRoundTime = performance.now() / 1000; 
 
       requestAnimationFrame(loop);
     }

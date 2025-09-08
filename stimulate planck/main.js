@@ -18,8 +18,8 @@ let lastRoundTime = performance.now() / 1000;
 
 let wallsActive = false;
 const BORDER = 7;
-let wallsStartTime = null; // زمان فعال شدن دیوارها
-const WALL_BLOCK_DURATION = 50; // ثانیه
+let wallsStartTime = null; 
+const WALL_BLOCK_DURATION = 50; 
 let lastSpawnSide = null;
 let hoveredShape = null;
 let showColliders = false;
@@ -35,10 +35,10 @@ function resize()
     // updateAllShapesSize();
    }
     //    shapes.forEach(s => {
-    //     if (s.buildSVG) s.buildSVG();  // دوباره SVG و کالیدر ساخته می‌شود
+    //     if (s.buildSVG) s.buildSVG(); 
     // });
 
-    // drawAllShapes(); // رندر مجدد canvas
+    // drawAllShapes(); 
 window.addEventListener('resize', resize);
 resize();
 
@@ -52,9 +52,8 @@ function updateAllShapesSize() {
 
 
 function updateShapeSize() {
-    // فرض کنیم اندازه پایه برای 1000px عرض است
     // const baseSize = 100;  
-    // const scale = canvas.width / 1000;  // نسبت فعلی به اندازه پایه
+    // const scale = canvas.width / 1000;  
     // shapeSize = baseSize * scale;
 }
 
@@ -63,7 +62,6 @@ function updateShapesOnResize() {
     // const cy = canvas.height / 2;
 
     // for (const s of shapes) {
-    //     // تغییر سرعت برای هماهنگی با اندازه جدید
     //     let dx = cx - s.x;
     //     let dy = cy - s.y;
     //     const dist = Math.hypot(dx, dy) || 1;
@@ -97,10 +95,7 @@ function ensureInitial() {
   generateShapesWithDelay(MAX_SHAPES, 300);
 }
 
-// ===================== کلاس‌ها =====================
 
-
-// ===================== توابع کمکی =====================
 function getRandomSide() {
   const sides = ["left", "right", "top", "bottom"];
   return sides[Math.floor(Math.random() * sides.length)];
@@ -108,9 +103,6 @@ function getRandomSide() {
 
 
 
-
-
-// ===================== حلقه اصلی =====================
 function loop(now) {
   if (!started) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -119,14 +111,11 @@ function loop(now) {
   last = now;
 
   const currentTime = performance.now() / 1000;
-  // --- بررسی راند ---
   if (currentTime - lastRoundTime >= roundTime) {
     round++;
     lastRoundTime = currentTime;
-    // با هر راند جدید، دوباره اشکال تولید کن
 
     generateShapesWithDelay(MAX_SHAPES, 300);
-    //delay 
 
   }
   if (hoveredShape) {
@@ -176,7 +165,6 @@ liveBtn.style.display = 'none';
 toggleCollider.style.display = 'none';
 
 startBtn.addEventListener('click', () => {
-  // مخفی کردن استارت پنل
   startBtn.style.display = 'none';
   liveBtn.style.display = 'block';
   controlPanel.style.display = 'none';
@@ -192,7 +180,7 @@ closeControlPanel.addEventListener('click', () => {
 
 liveBtn.addEventListener('click', () => {
   if (controlPanel.style.display === 'none' || controlPanel.style.display === '') {
-    controlPanel.style.display = 'block'; // یا grid یا هرچی استایل اصلیته
+    controlPanel.style.display = 'block'; 
   } else {
     controlPanel.style.display = 'none';
   }
@@ -204,15 +192,14 @@ liveBtn.addEventListener('click', () => {
 function startGame() {
 
   ensureInitial();
-  shapes = [];       // ← همه شکل‌های قدیمی پاک بشن
+  shapes = [];       
   totalShapes = 0;
   remainedShapes = 0;
   SPEED = 0;
 
-  // --- شروع حلقه ---
   started = true;
   last = performance.now();
-  lastRoundTime = performance.now() / 1000; // ریست زمان راند
+  lastRoundTime = performance.now() / 1000;
 
   requestAnimationFrame(loop);
 }

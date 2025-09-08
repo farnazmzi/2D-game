@@ -1,7 +1,7 @@
 
 
 let shapes = [];
-const SCALE = 30; // هر متر = 30px
+const SCALE = 30; 
 const pl = planck;
 const world = new pl.World(pl.Vec2(0, 0));
 window.circleShape;
@@ -12,9 +12,7 @@ window.starShape;
 window.size = 50;
 window.height = 50;
 window.width = 80;
-// گرفتن کانتکست 2D
 
-// متغیر برای نشان دادن کالیدر
  function spawnVelocityTowardsCenter(SPEED) {
       const cx = canvas.width / 2, cy = canvas.height / 2;
       return (x, y) => {
@@ -37,23 +35,17 @@ window.width = 80;
     }
 
 
-// ----------------
-// ساخت شکل‌ها
-// ----------------
 function createCircle(x, y, r = window.size, color = randomColor(), border = 7) {
     const body = world.createDynamicBody(pl.Vec2(x / SCALE, y / SCALE));
 
-    // شعاع فیزیکی = شعاع اصلی + ضخامت مرز
     const physicsR = r + border;
 
-    // Fixture برای فیزیک
     body.createFixture(pl.Circle(physicsR / SCALE), { density: 1, restitution: 0.8 });
 
     body.renderColor = color;
     body.border = border;
     body.strokeColor = "#fff";
 
-    // شعاع واقعی برای رسم
     body.visualRadius = r;
 
     return body;
@@ -63,7 +55,6 @@ function createCircle(x, y, r = window.size, color = randomColor(), border = 7) 
 function createBox(x, y, w = 80, h = 80, color = randomColor(), strokeWidth = 7) {
   const body = world.createDynamicBody(pl.Vec2(x / SCALE, y / SCALE));
 
-  // فقط یک مستطیل ساده (که در اینجا مربع هم میشه اگر w=h بدی)
   body.createFixture(pl.Box(w / 2 / SCALE, h / 2 / SCALE), {
     density: 1,
     restitution: 0.5
@@ -76,27 +67,16 @@ function createBox(x, y, w = 80, h = 80, color = randomColor(), strokeWidth = 7)
   return body;
 }
 
-// function createPolygon(x, y, verts, color = randomColor()) {
-//   const body = world.createDynamicBody(pl.Vec2(x / SCALE, y / SCALE));
-//   const vecs = verts.map(p => pl.Vec2(p.x / SCALE, p.y / SCALE));
-//   if (pl.Polygon.isValid(vecs)) {
-//     body.createFixture(pl.Polygon(vecs), { density: 1, restitution: 0.6 });
-//   }
-//   body.renderColor = color;
-//   body.border = 7;         // ضخامت مرز
-//   body.strokeColor = "#fff"; // رنگ مرز
-//   return body;
-// }
+
 
 function createTriangle(x, y, size = window.size, color = randomColor()) {
   const body = world.createDynamicBody(pl.Vec2(x / SCALE, y / SCALE));
 
-  // مختصات رئوس مثلث متساوی‌الاضلاع
   const height = size * Math.sqrt(3) / 2;
   const verts = [
-    pl.Vec2(0, -height / 2 / SCALE),            // رأس بالا
-    pl.Vec2(-size / 2 / SCALE, height / 2 / SCALE),  // پایین چپ
-    pl.Vec2(size / 2 / SCALE, height / 2 / SCALE)    // پایین راست
+    pl.Vec2(0, -height / 2 / SCALE),          
+    pl.Vec2(-size / 2 / SCALE, height / 2 / SCALE),  
+    pl.Vec2(size / 2 / SCALE, height / 2 / SCALE)   
   ];
 
   body.createFixture(pl.Polygon(verts), { density: 1, restitution: 0.6 });
@@ -111,7 +91,6 @@ function createTriangle(x, y, size = window.size, color = randomColor()) {
 function createRectangle(x, y, width = window.height, height = window.height, color = randomColor()) {
   const body = world.createDynamicBody(pl.Vec2(x / SCALE, y / SCALE));
 
-  // Box: نصف عرض و نصف ارتفاع
   body.createFixture(pl.Box(width / 2 / SCALE, height / 2 / SCALE), { density: 1, restitution: 0.8 });
 
   body.renderColor = color;
@@ -140,29 +119,6 @@ function createHexagon(x, y, radius = window.size, color = randomColor()) {
 }
 
 
-// function createStar(x, y, spikes = 5, outerR = 50, innerR = 25, color = randomColor()) {
-//   const body = world.createDynamicBody(pl.Vec2(x / SCALE, y / SCALE));
-//   const step = Math.PI / spikes;
-
-//   for (let i = 0; i < spikes; i++) {
-//     const angle = i * 2 * step - Math.PI / 2;
-//     const angleNext = (i * 2 + 2) * step - Math.PI / 2;
-//     const p1 = {x: Math.cos(angle) * outerR, y: Math.sin(angle) * outerR};
-//     const p2 = {x: Math.cos(angle + step) * innerR, y: Math.sin(angle + step) * innerR};
-//     const p3 = {x: Math.cos(angleNext) * outerR, y: Math.sin(angleNext) * outerR};
-//     // Fixture مستقیم بدون isValid
-//     body.createFixture(pl.Polygon([pl.Vec2(p1.x / SCALE, p1.y / SCALE), 
-//                                    pl.Vec2(p2.x / SCALE, p2.y / SCALE), 
-//                                    pl.Vec2(p3.x / SCALE, p3.y / SCALE)]), 
-//                        {density: 1, restitution: 0.8});
-//   }
-//   body.renderColor = color;
-//   body.border = 7;
-//   body.strokeColor = "#fff";
-//   return body;
-// }
-
-
 
 class Shape {
   constructor(body, type) {
@@ -173,8 +129,8 @@ class Shape {
     this.maxWallBounces = 3;
     this.wallBounces = 0;
     this.collisionsEnabled = true;
-    this.size = 50;       // مقدار پیش‌فرض
-    this.strokeWidth = 7; // مقدار پیش‌فرض
+    this.size = 50;       
+    this.strokeWidth = 7; 
   }
 
   get pos() { return this.body.getPosition(); }
@@ -190,7 +146,6 @@ class Shape {
       ctx.translate(this.pos.x * SCALE, this.pos.y * SCALE);
       ctx.rotate(this.angle);
 
-      // رسم شکل
       ctx.beginPath();
       if (shape.m_type === 'circle') {
         const r = shape.m_radius * SCALE;
@@ -213,7 +168,6 @@ class Shape {
         ctx.stroke();
       }
 
-      // لاگ قبل کالیدر
       console.log(`Calling drawCollider for shape ${this.type}`);
       drawCollider(ctx, this);
 
@@ -222,7 +176,6 @@ class Shape {
   }
 }
 
-//foraccess
 circleShape = new Shape(createCircle(200, 200, 40, randomColor()), "circle");
 circleShape.size = 80;
 circleShape.strokeWidth = 7;
@@ -246,8 +199,8 @@ rectShape.strokeWidth = 7;
 shapes.push(rectShape);
 
 const triShape = new Shape(createPolygon(300, 200, randomColor()), "triangle");
-triShape.width = window.width;   // عرض پایه مثلث
-triShape.height = Math.sqrt(3)/2 * window.width; // ارتفاع مثلث متساوی‌الاضلاع
+triShape.width = window.width;   
+triShape.height = Math.sqrt(3)/2 * window.width; 
 triShape.strokeWidth = 7;
 shapes.push(triShape);
 
@@ -258,7 +211,6 @@ shapes.push(triShape);
 // shapes.push(starShape);
 
 // ----------------
-// رسم شکل‌ها
 // ----------------
 function drawCollider(ctx, shapeObj) {
 
@@ -271,21 +223,18 @@ const angle = shapeObj.body.angle;
 // const vertices = shapeObj.body.vertices;
 
   ctx.save();
-  ctx.translate(shapeObj.x, shapeObj.y); // موقعیت شکل
-  ctx.rotate(angle);        // چرخش شکل
-
+  ctx.translate(shapeObj.x, shapeObj.y); 
+  ctx.rotate(angle);        
   ctx.strokeStyle = "lime";
 
   if (shapeObj.type === "circle") {
     const r = size / 2 +3;
 
-    // حلقه نزدیک دور شکل
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.arc(0, 0, r + strokeWidth, 0, Math.PI * 2);
     ctx.stroke();
 
-    // حلقه بزرگتر
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.arc(0, 0, r + strokeWidth + 5, 0, Math.PI * 2);
@@ -316,18 +265,15 @@ const size = shapeObj.size - 10;
 const h = Math.sqrt(3) / 2 * size;
 const offsetY = 10;
 
-// رئوس مثلث
 let verts = [
   { x: -size / 2, y: h / 3 + offsetY },
   { x:  size / 2, y: h / 3 + offsetY },
   { x: 0,         y: -2 * h / 3 + offsetY }
 ];
 
-// مرکز هندسی مثلث
 const cx = (verts[0].x + verts[1].x + verts[2].x) / 3;
 const cy = (verts[0].y + verts[1].y + verts[2].y) / 3;
 
-// ===== کالیدر اصلی =====
 ctx.lineWidth = 2;
 ctx.beginPath();
 ctx.moveTo(verts[0].x, verts[0].y);
@@ -337,8 +283,7 @@ for (let i = 1; i < verts.length; i++) {
 ctx.closePath();
 ctx.stroke();
 
-// ===== کالیدر بزرگ‌تر (scale حول مرکز) =====
-const scale = 1.2; // بزرگ‌تر شدن
+const scale = 1.2; 
 const vertsBig = verts.map(v => ({
   x: cx + (v.x - cx) * scale,
   y: cy + (v.y - cy) * scale
@@ -354,24 +299,21 @@ ctx.closePath();
 ctx.stroke();
    }
    else if (shapeObj.type === "hexagon") {
-  const radius = shapeObj.size -38;   // شعاع شش‌ضلعی
-  const offsetY = 0;              // اگه خواستی مثلث پایین‌تر بیاد می‌تونی اینجا هم بدی
+  const radius = shapeObj.size -38;   
+  const offsetY = 0;              
 
-  // رئوس شش‌ضلعی
   let verts = [];
   for (let i = 0; i < 6; i++) {
-    const angle = (i / 6) * Math.PI * 2; // زاویه هر رأس
+    const angle = (i / 6) * Math.PI * 2; 
     verts.push({
       x: Math.cos(angle) * radius,
       y: Math.sin(angle) * radius + offsetY
     });
   }
 
-  // مرکز هندسی (میانگین رأس‌ها)
   const cx = verts.reduce((sum, v) => sum + v.x, 0) / verts.length;
   const cy = verts.reduce((sum, v) => sum + v.y, 0) / verts.length;
 
-  // ===== کالیدر اصلی =====
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(verts[0].x, verts[0].y);
@@ -381,8 +323,7 @@ ctx.stroke();
   ctx.closePath();
   ctx.stroke();
 
-  // ===== کالیدر بزرگتر =====
-  const scale = 0.9; // مقدار بزرگ‌تر شدن
+  const scale = 0.9;
   const vertsBig = verts.map(v => ({
     x: cx + (v.x - cx) * scale,
     y: cy + (v.y - cy) * scale
@@ -399,7 +340,6 @@ ctx.stroke();
 }
 
  else if (shapeObj.type === "polygon") {
-    // چندضلعی منتظم
     const verts = shapeObj.body.getFixtureList().getShape().m_vertices;
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -417,19 +357,7 @@ ctx.stroke();
       ctx.lineTo(v.x * SCALE, v.y * SCALE);
     }
   }
-  // else { // مربع یا چندضلعی
-  //   const half = size / 2;
 
-  //   // حلقه نزدیک دور شکل
-  //   ctx.lineWidth = 2;
-  //   ctx.strokeRect(-half - strokeWidth, -half - strokeWidth, size + strokeWidth * 2, size + strokeWidth * 2);
-
-  //   // حلقه بزرگتر
-  //   ctx.lineWidth = 1;
-  //   ctx.strokeRect(-half - strokeWidth - 5, -half - strokeWidth - 5, size + strokeWidth * 2 + 10, size + strokeWidth * 2 + 10);
-  // }
-
-  // متن
   ctx.fillStyle = "#ffffff";
   ctx.font = "12px Arial";
   ctx.fillText(`W:${shapeObj.wallBounces}/${shapeObj.maxWallBounces}`, -size / 2, size / 2 + 20);
@@ -439,7 +367,7 @@ ctx.stroke();
 
 
 function drawBody(ctx, maybeShapeOrBody) {
-  const body = maybeShapeOrBody.body ? maybeShapeOrBody.body : maybeShapeOrBody; // انعطاف
+  const body = maybeShapeOrBody.body ? maybeShapeOrBody.body : maybeShapeOrBody; 
 
   const pos = body.getPosition();
   const angle = body.getAngle();
@@ -495,11 +423,9 @@ function tryGenerateShape() {
   let sx, sy;
   let r;
 
-  // لیست شکل‌ها: 0=دایره، 1=مربع، 2=مثلث، 3=ستاره، 4=چندضلعی منتظم
   const shapeTypes = [0, 1, 2, 3, 4];
   const shapeType = shapeTypes[Math.floor(Math.random() * shapeTypes.length)];
 
-  // تعیین اندازه پایه
   switch (shapeType) {
     case 0: r = 40; break; // circle
     case 1: r = 50; break; // square
@@ -508,7 +434,6 @@ function tryGenerateShape() {
     case 4: r = 40; break; // regular polygon
   }
 
-  // پیدا کردن نقطه شروع آزاد
   function isFreePosition(x, y, radius) {
     for (const b of shapes) {
       const pos = b.body.getPosition();
@@ -539,19 +464,18 @@ function tryGenerateShape() {
   const color = randomColor();
   let body, shapeObj, typeName;
 
-  // انتخاب شکل
   switch (shapeType) {
-    case 0: { // دایره
+    case 0: { 
         body = createCircle(sx, sy, window.size, color);
         typeName = "circle";
         break;
     }
-    case 1: { // مربع
+    case 1: { 
         body = createBox(sx, sy, window.size, window.size, color);
         typeName = "square";
         break;
     }
-    case 2: { // مثلث
+    case 2: { 
       body = createTriangle(sx, sy, window.size+20, color);
         typeName = "triangle";
         break;
@@ -566,12 +490,12 @@ function tryGenerateShape() {
         typeName = "hexagon";
         break;
     }
-    case 3: { // ستاره
+    case 3: {
         body = createStar(sx, sy, 5, r, r*0.5, color);
         typeName = "star";
         break;
     }
-    case 5: { // چندضلعی 6 ضلعی
+    case 5: { 
         const sides = 6;
         const verts = [];
         for(let i=0;i<sides;i++){
@@ -613,9 +537,7 @@ function generateShapesWithDelay(count, delay) {
     if (i >= count) return;
 
     const sh = tryGenerateShape();
-    // اینجا دیگه shapes.push(sh) نکن؛ tryGenerateShape خودش push کرده
     if (sh) {
-      // فقط شمارنده‌ها اگر بخوای می‌تونی اینجا مدیریت کنی، ولی از قبل انجام شده
     }
 
     i++;

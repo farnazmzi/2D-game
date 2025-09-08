@@ -32,9 +32,9 @@
         mkCircle(opts = {}) {
             const { stroke = '#ff0000', fill = '#ffffff', outlinePx = 12, size = 96, radius } = opts;
 
-            const r = radius ?? size / 2; // نصف سایز به عنوان رادیوس
-            const cx = size / 2; // مرکز x
-            const cy = size / 2; // مرکز y
+            const r = radius ?? size / 2; 
+            const cx = size / 2; 
+            const cy = size / 2; 
 
             const strokeLocal = computeStrokeLocal(size, outlinePx);
 

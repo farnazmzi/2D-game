@@ -5,7 +5,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Shapes Collision & Rotation</title>
-    <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="main.css">
 
 
 
@@ -18,7 +18,18 @@
     <button id="toggleCollider">Colliders</button>
   </div>
 
-  <pre id="debug">
+  <pre id="debug" style="position:fixed; right:12px; top:12px; 
+            background:#222; 
+            color:#0f0; 
+            padding:8px; 
+            border-radius:8px; 
+            width: 250px;
+            max-height: 300px; 
+            display:none; 
+            background: rgba(51, 51, 51, 0.5); 
+            overflow: auto;
+
+">
 Debug info here
 </pre>
 
@@ -34,43 +45,38 @@ Debug info here
 
     <div class="controlRow">
       <label>Max Shapes: <span id="maxShapesValStart"></span></label>
-      <input type="range" id="maxShapesSliderStart" min="1" max="50" >
+      <input type="range" id="maxShapesSliderStart" min="1" max="50">
     </div>
 
     <div class="controlRow">
       <label>Speed: <span id="speedValStart"></span></label>
-      <input type="range" id="speedSliderStart" min="0.04" max="67.2" >
+      <input type="range" id="speedSliderStart" min="0.04" max="67.2">
     </div>
 
     <div class="controlRow">
       <label>RoundTime: <span id="roundTimeValStart"></span></label>
-      <input type="range" id="roundTimeSliderStart" min="5" max="120" >
+      <input type="range" id="roundTimeSliderStart" min="5" max="120">
     </div>
 
     <div class="controlRow">
       <label>Bounces: <span id="maxWallBouncesValStart"></span></label>
-      <input type="range" id="maxWallBouncesSliderStart" min="1" max="10" >
+      <input type="range" id="maxWallBouncesSliderStart" min="1" max="10">
     </div>
   </div>
 
-<div id="buttonContainercenter">
-  <button id="startGameBtn" class="control-btn">Start Game</button>
-  <button id="toggleLive" class="control-btn">Settings</button>
-</div>
+  <div id="buttonContainercenter">
+    <button id="startGameBtn" class="control-btn">Start Game</button>
+    <button id="toggleLive" class="control-btn">Settings</button>
+  </div>
 
 
   <canvas id="canvas"></canvas>
   <div id="hud"></div>
-      <script src="matter.js"></script>
-      <script src="poly-decomp.min.js"></script>
-      <!-- <script src="martinez-polygon.min.js"></script> -->
-        <script src="main.js"></script>
-        <script src="svgmaker.js"></script>
-
-
-    <script src="dragdebug.js"></script>
-
-
+  <script src="matter.min.js"></script>
+  <script src="poly-decomp.min.js"></script>
+  <script src="main.js"></script>
+  <script src="svgmaker.js"></script>
+  <script src="dragdebug.js"></script>
   <script src="shape.js"></script>
   <script src="wall.js"></script>
   <script src="controller.js"></script>

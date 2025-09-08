@@ -1,5 +1,7 @@
    const toggleBtn = document.getElementById('toggleDebug');
     const debugPre = document.getElementById('debug');
+    
+debugPre.style.display === 'none';
 
     toggleBtn.addEventListener('click', () => {
       if (debugPre.style.display === 'none') {

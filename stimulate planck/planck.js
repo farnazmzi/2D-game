@@ -148,7 +148,7 @@ function polyPolyContact(A, B, polyA, polyB) {
     const [minA, maxA] = projectCorners(polyA, ax);
     const [minB, maxB] = projectCorners(polyB, ax);
     const o = Math.min(maxA, maxB) - Math.max(minA, minB);
-    if (o <= 0) return null; // جدا هستند
+    if (o <= 0) return null; 
     if (o < minOverlap) { minOverlap = o; bestAxis = ax; }
   }
 
@@ -188,7 +188,6 @@ function getPolys(shape) {
     const ptsLocal = shape.starColliderOffset && shape.starColliderOffset.length
       ? shape.starColliderOffset
       : getStarCorners(shape); // fallback
-    // تبدیل به world coords
     const pts = ptsLocal.map(p => ({
       x: p.x + shape.x,
       y: p.y + shape.y
@@ -217,7 +216,6 @@ function buildContact(A, B) {
 
   return bestContact;
 }
-// کمکی‌های برداری
 function sub(a, b) {
   return { x: a.x - b.x, y: a.y - b.y };
 }
@@ -242,11 +240,10 @@ function dot(a, b) {
 function resolveCollisions(shapes) {
   const posIters = 10;
   const velIters = 8;
-  const slop = 0.01; // حد tolerable overlap
+  const slop = 0.01; 
   const ANGLE_DAMP = 0.2;
   const MAX_ANG = 15;
 
-  // 1) جمع‌آوری همه برخوردها
   const contacts = [];
   for (let i = 0; i < shapes.length; i++) {
     for (let j = i + 1; j < shapes.length; j++) {
@@ -255,7 +252,6 @@ function resolveCollisions(shapes) {
     }
   }
 
-  // 2) اصلاح موقعیت (positional correction) با 100% تصحیح
   for (let it = 0; it < posIters; it++) {
     let any = false;
     for (const c of contacts) {
@@ -276,7 +272,6 @@ function resolveCollisions(shapes) {
     if (!any) break;
   }
 
-  // 3) حل برخورد با ایمپالس (velocity resolution)
   for (let it = 0; it < velIters; it++) {
     for (const c of contacts) {
       const rec = buildContact(c.A, c.B);
