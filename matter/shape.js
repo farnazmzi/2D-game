@@ -1039,7 +1039,7 @@ class SvgRegularPolygonShape  extends BaseShape{
     this.id = Math.random().toString(36).slice(2, 10);
     this.type = "RegularPolygon";
     this.name = "RegularPolygon";
-
+    this.n = 8;
     this.angVel = (Math.random() * 2 - 1) * Math.PI / 180;
 
     this.strokeWidth = opts.strokeWidth || 7;

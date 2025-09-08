@@ -234,7 +234,7 @@ function spawnShape() {
 
 
     // const types = ["Glyph"];
-    const types = ["Star", "Circle", "Triangle", "Square", "Diamond", "Rectangle", "Glyph", "RegularPolygon"];
+    const types = ["Star", "Circle", "Triangle", "Square", "Diamond", "Rectangle", "RegularPolygon" , "Glyph"];
     const shapeType = types[Math.floor(Math.random() * types.length)];
     if (isTooClose(sx, sy, shapes, window.shapeSize)) continue;
 
@@ -373,11 +373,11 @@ function spawnShape() {
 
           const body = Matter.Bodies.rectangle(cx, cy, w, h, {
             isStatic: false,
-            restitution: 0.8,
-            friction: 0.0,
-            frictionAir: 0.0,
+            restitution: 0.1,
+            friction: 0.003,
+            frictionAir: 0.001,
             density: 0.001,
-            slop: 0.01,
+            slop: 0.0001,
             render: { fillStyle: shape.fillColor, strokeStyle: shape.borderColor }
           });
 
@@ -392,11 +392,11 @@ function spawnShape() {
         shape.body = Matter.Body.create({
           parts: shape.bodies,
           isStatic: false,
-          restitution: 0.8,
-          friction: 0.0,
-          frictionAir: 0.0,
+          restitution: 0.1,
+          friction: 0.003,
+          frictionAir: 0.001,
           density: 0.001,
-          slop: 0.01,
+          slop: 0.0001,
           angularVelocity: (Math.random() - 0.5) * 0.05
         });
         Matter.Body.setPosition(shape.body, { x: shape.x, y: shape.y });
