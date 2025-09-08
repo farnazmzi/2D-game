@@ -24,27 +24,29 @@ function drawWalls() {
 function handleWalls(body) {
   if (!wallActive) return;
 
-  const pos = body.position;
-  const vel = body.velocity;
-  const r = body.circleRadius ? body.circleRadius : 20;
-  const px = pos.x;
-  const py = pos.y;
-
   if (body.wallBounces === undefined) body.wallBounces = 0;
   if (body.maxWallBounces === undefined) body.maxWallBounces = window.maxWallBounces;
   if (body.hitMaxBounces === undefined) body.hitMaxBounces = false;
   if (body.outOfBounds === undefined) body.outOfBounds = false;
 
-  let vx = vel.x, vy = vel.y;
+  let vx = body.velocity.x;
+  let vy = body.velocity.y;
   let hitWall = false;
 
-  const margin = 32;
+  const margin = 3; // همون ضخامت دیوار
 
   if (!body.hitMaxBounces) {
-    if (px - r < margin && vx < 0) { vx = Math.abs(vx); hitWall = true; }
-    if (px + r > canvas.width - margin && vx > 0) { vx = -Math.abs(vx); hitWall = true; }
-    if (py - r < margin && vy < 0) { vy = Math.abs(vy); hitWall = true; }
-    if (py + r > canvas.height - margin && vy > 0) { vy = -Math.abs(vy); hitWall = true; }
+    // کالیدر رو بگیر (اگه وجود داشت) وگرنه به fallback دایره برگرد
+    let colliderPoints = body.svgShape && body.svgShape.getColliderPoints
+      ? body.svgShape.getColliderPoints()
+      : [{x: body.position.x, y: body.position.y}]; 
+
+    for (let p of colliderPoints) {
+      if (p.x < margin && vx < 0) { vx = Math.abs(vx); hitWall = true; }
+      if (p.x > canvas.width - margin && vx > 0) { vx = -Math.abs(vx); hitWall = true; }
+      if (p.y < margin && vy < 0) { vy = Math.abs(vy); hitWall = true; }
+      if (p.y > canvas.height - margin && vy > 0) { vy = -Math.abs(vy); hitWall = true; }
+    }
 
     if (hitWall) {
       Matter.Body.setVelocity(body, { x: vx, y: vy });
@@ -62,8 +64,8 @@ function handleWalls(body) {
   const marginX = canvas.width * 0.22;
   const marginY = canvas.height * 0.22;
   if (body.hitMaxBounces) {
-    if (px < -marginX || px > canvas.width + marginX ||
-      py < -marginY || py > canvas.height + marginY) {
+    if (body.position.x < -marginX || body.position.x > canvas.width + marginX ||
+        body.position.y < -marginY || body.position.y > canvas.height + marginY) {
       body.outOfBounds = true;
     }
   }
