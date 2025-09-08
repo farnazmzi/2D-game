@@ -9,6 +9,9 @@
       }
     });
 
+            window.addEventListener("keydown", (e) => {
+          if (e.altKey && (e.key === "d" || e.key === "D")) toggleBtn.click();
+        });
     function drawDebugInfo() {
       if (!hoveredShape) return;
 
@@ -39,7 +42,7 @@
         objectBounces: hoveredShape.bounces,
         wallBounces: hoveredShape.wallBounces,
         wallBouncesRemaining: hoveredShape.bouncesRemaining,
-        maxWallBounces: hoveredShape.maxWallBounces,
+        maxWallBounces: window.maxWallBounces,
         collisionsEnabled: hoveredShape.collisionsEnabled,
 
         inField: hoveredShape.inField,

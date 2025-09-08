@@ -27,16 +27,15 @@ const WALL_BLOCK_DURATION = 50;
 let lastSpawnSide = null;
 let hoveredShape = null;
 let showColliders = false;
-let outOfBounds = false;
-
 window.maxWallBounces = 3;
 window.shapeSize = 100;
-
+let phys = null;
 window.SPEED = window.SPEED ?? 1;
 window.REGEN_INTERVAL = window.REGEN_INTERVAL ?? 50;
 window.MAX_SHAPES = window.MAX_SHAPES ?? 20;
 
 let MARGIN = Math.min(canvas.width, canvas.height) * 0.15;
+const VIEW_MARGIN = 200;
 const SPAWN_OFFSET = 0.5;
 let bounced = false;
 // ====================== Matter.js ======================
@@ -45,23 +44,12 @@ const engine = Engine.create();
 const world = engine.world;
 engine.world.gravity.x = 0;
 engine.world.gravity.y = 0;
-
-
+engine.positionIterations = 10; // default 6
+engine.velocityIterations = 10; // default 4
+let simulationStartTime = 0; // Track when simulation started
+const SPAWN_INTERVAL_MS = 2500;
+let idx = 0;
 Matter.Common.setDecomp(window.decomp);
-// Runner.run(Runner.create(), engine);
-// const render = Render.create({
-//   canvas: canvas,
-//   engine: engine,
-//   options: {
-//     width: canvas.width,
-//     height: canvas.height,
-//     wireframes: false,
-//     background: "#000000ff"
-//   }
-// });
-
-// Render.run(render);
-// Runner.run(Runner.create(), engine);
 
 
 let GLYPH5x7 = {
@@ -80,13 +68,13 @@ let GLYPH5x7 = {
   "C": ["01110", "10001", "10000", "10000", "10000", "10001", "01110"],
   "D": ["11100", "10010", "10001", "10001", "10001", "10010", "11100"],
   "E": ["11111", "10000", "10000", "11110", "10000", "10000", "11111"],
-  "F": ["11111", "10000", "10000", "11110", "10000", "10000", "10000"],
+  // "F": ["11111", "10000", "10000", "11110", "10000", "10000", "10000"],
   "G": ["01110", "10001", "10000", "10111", "10001", "10001", "01110"],
   "H": ["10001", "10001", "10001", "11111", "10001", "10001", "10001"],
   "I": ["01110", "00100", "00100", "00100", "00100", "00100", "01110"],
   "J": ["00111", "00010", "00010", "00010", "10010", "10010", "01100"],
   "K": ["10001", "10010", "10100", "11000", "10100", "10010", "10001"],
-  "L": ["10000", "10000", "10000", "10000", "10000", "10000", "11111"],
+  // "L": ["10000", "10000", "10000", "10000", "10000", "10000", "11111"],
   "M": ["10001", "11011", "10101", "10101", "10001", "10001", "10001"],
   "N": ["10001", "11001", "10101", "10011", "10001", "10001", "10001"],
   "O": ["01110", "10001", "10001", "10001", "10001", "10001", "01110"],
@@ -94,54 +82,58 @@ let GLYPH5x7 = {
   "Q": ["01110", "10001", "10001", "10001", "10101", "10010", "01101"],
   "R": ["11110", "10001", "10001", "11110", "10100", "10010", "10001"],
   "S": ["01111", "10000", "10000", "01110", "00001", "00001", "11110"],
-  "T": ["11111", "00100", "00100", "00100", "00100", "00100", "00100"],
+  // "T": ["11111", "00100", "00100", "00100", "00100", "00100", "00100"],
   "U": ["10001", "10001", "10001", "10001", "10001", "10001", "01110"],
   "V": ["10001", "10001", "10001", "10001", "01010", "01010", "00100"],
   "W": ["10001", "10001", "10001", "10101", "10101", "11011", "10001"],
   "X": ["10001", "01010", "00100", "00100", "00100", "01010", "10001"],
-  "Y": ["10001", "01010", "00100", "00100", "00100", "00100", "00100"],
+  // "Y": ["10001", "01010", "00100", "00100", "00100", "00100", "00100"],
   "Z": ["11111", "00001", "00010", "00100", "01000", "10000", "11111"]
 };
 
+const view = { w: 0, h: 0 };
+const _world = { w: 0, h: 0 };
+const camera = { x: VIEW_MARGIN, y: VIEW_MARGIN };
+const field = { x: VIEW_MARGIN, y: VIEW_MARGIN, w: 0, h: 0 }; // viewport rectangle inside world
 
-function resize() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+function resizeCanvas() {
+    const DPR = window.devicePixelRatio || 1; 
+const w = window.innerWidth;
+  const h = window.innerHeight;
+
+  // سایز رندر واقعی
+  canvas.width = w * DPR;
+  canvas.height = h * DPR;
+
+  // سایز ظاهری
+  canvas.style.width = w + "px";
+  canvas.style.height = h + "px";
   MARGIN = Math.min(canvas.width, canvas.height) * 0.15;
-  //   updateShapeSize();
-  // updateShapesOnResize();
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+  view.w = w; view.h = h;
+  _world.w = view.w + VIEW_MARGIN * 2;
+  _world.h = view.h + VIEW_MARGIN * 2;
+  camera.x = VIEW_MARGIN; camera.y = VIEW_MARGIN;
+
+  field.x = camera.x; field.y = camera.y; field.w = view.w; field.h = view.h;
+
+  // Log viewport dimensions
+  console.log(`🖼️ Canvas/Viewport dimensions: ${w}x${h}, DPR: ${DPR}`);
+  console.log(`🌍 World dimensions: ${_world.w}x${_world.h}`);
+  console.log(`📐 Field bounds: x=${field.x}-${field.x + field.w}, y=${field.y}-${field.y + field.h}`);
+  console.log(`📷 Camera position: (${camera.x}, ${camera.y})`);
+
+  if (phys) phys.resizeBounds({
+    _world: { width: _world.w, height: _world.h },
+    field: { x: field.x, y: field.y, width: field.w, height: field.h }
+  });
+
   updateAllShapesSize();
 }
-//    shapes.forEach(s => {
-//     if (s.buildSVG) s.buildSVG(); 
-// });
-
-// drawAllShapes(); 
-window.addEventListener('resize', resize);
-resize();
-
-
-// function updateShapeSize() {
-//   const baseSize = 100;
-//   const scale = canvas.width / 1000; 
-//   shapeSize = baseSize * scale;
-// }
-
-// function updateShapesOnResize() {
-//   const cx = canvas.width / 2;
-//   const cy = canvas.height / 2;
-
-//   for (const s of shapes) {
-//     let dx = cx - s.x;
-//     let dy = cy - s.y;
-//     const dist = Math.hypot(dx, dy) || 1;
-//     dx /= dist;
-//     dy /= dist;
-
-//     s.vx = dx * window.SPEED;
-//     s.vy = dy * window.SPEED;
-//   }
-// }
+window.addEventListener("resize", () => {
+  requestAnimationFrame(resizeCanvas); 
+});
 
 function updateAllShapesSize() {
   shapes.forEach(s => {
@@ -150,14 +142,19 @@ function updateAllShapesSize() {
 }
 
 
-const colliderBtn = document.getElementById('toggleCollider');
-colliderBtn.addEventListener('click', () => {
-  showColliders = !showColliders;
+window.addEventListener("DOMContentLoaded", () => {
+  const colliderBtn = document.getElementById('toggleCollider');
+  colliderBtn.addEventListener('click', () => {
+    showColliders = !showColliders;
+  });
+  window.addEventListener("keydown", (e) => {
+    if (e.altKey && (e.key === "c" || e.key === "C")) colliderBtn.click();
+  });
 });
 
 
 function ensureInitial() {
-  generateShapesWithDelay(MAX_SHAPES, 300);
+  generateShapesWithDelay(MAX_SHAPES, 1000);
 }
 
 
@@ -174,7 +171,24 @@ function getRandomColor() {
   return color;
 }
 
+
+// Helper to get elapsed time in ms
+function getElapsedMs() {
+  return simulationStartTime ? performance.now() - simulationStartTime : 0;
+}
+function logWithTime(message) {
+  console.log(`[${getElapsedMs().toFixed(1)}ms] ${message}`);
+}
 setInterval(() => globalSeconds++, 1000);
+function isTooClose(x, y, shapes, size) {
+  for (let s of shapes) {
+    const dx = s.x - x;
+    const dy = s.y - y;
+    const dist = Math.hypot(dx, dy);
+    if (dist < size) return true;
+  }
+  return false;
+}
 
 function spawnShape() {
   let shape;
@@ -218,16 +232,18 @@ function spawnShape() {
       }
     }
 
-    const types = ["Star"];
-    // const types = ["Star", "Circle", "Triangle", "Square", "Diamond", "Rectangle", "Glyph","RegularPolygon"];
+
+    // const types = ["Glyph"];
+    const types = ["Star", "Circle", "Triangle", "Square", "Diamond", "Rectangle", "Glyph", "RegularPolygon"];
     const shapeType = types[Math.floor(Math.random() * types.length)];
+    if (isTooClose(sx, sy, shapes, window.shapeSize)) continue;
 
     const commonPhysicsProps = {
       restitution: 0.5,
       friction: 0.0,
       frictionAir: 0.0,
       density: 0.001,
-      slop: 0.01,
+      slop: 0.0001,
       angularVelocity: (Math.random() - 0.5) * 0.05
     };
 
@@ -256,17 +272,24 @@ function spawnShape() {
       }, true);
 
     } else if (shapeType === "Triangle") {
+
       shape = new SvgTriangle(sx, sy, {
         strokeWidth: 7,
         fillColor: getRandomColor(),
         borderColor: getRandomColor()
       });
-      const verts = shape.getColliderPoints();
-      shape.body = Matter.Bodies.fromVertices(shape.x, shape.y, [verts], {
-        ...commonPhysicsProps,
-        render: { fillStyle: shape.fill, strokeStyle: shape.stroke }
-      }, true);
 
+
+      shape.body = Matter.Bodies.fromVertices(
+        shape.x,
+        shape.y,
+        [shape.colliderBase],
+        {
+          ...commonPhysicsProps,
+          render: { fillStyle: shape.fillColor, strokeStyle: shape.borderColor }
+        },
+        true
+      );
     } else if (shapeType === "Square") {
       shape = new SvgSquare(sx, sy, {
         fillColor: getRandomColor(),
@@ -279,7 +302,7 @@ function spawnShape() {
       }, true);
 
     } else if (shapeType === "Diamond") {
-      shape = new SvgOctagon(sx, sy, {
+      shape = new SvgDiamond(sx, sy, {
         fillColor: getRandomColor(),
         borderColor: getRandomColor()
       });
@@ -305,7 +328,7 @@ function spawnShape() {
     else if (shapeType === "RegularPolygon") {
       shape = new SvgRegularPolygonShape(sx, sy, 8, {
         fillColor: getRandomColor(),
-        fill: getRandomColor()
+        borderColor: getRandomColor()
       });
       const verts = shape.getColliderPoints();
       shape.body = Matter.Bodies.fromVertices(shape.x, shape.y, [verts], {
@@ -350,7 +373,7 @@ function spawnShape() {
 
           const body = Matter.Bodies.rectangle(cx, cy, w, h, {
             isStatic: false,
-            restitution: 0.5,
+            restitution: 0.8,
             friction: 0.0,
             frictionAir: 0.0,
             density: 0.001,
@@ -369,7 +392,7 @@ function spawnShape() {
         shape.body = Matter.Body.create({
           parts: shape.bodies,
           isStatic: false,
-          restitution: 0.5,
+          restitution: 0.8,
           friction: 0.0,
           frictionAir: 0.0,
           density: 0.001,
@@ -401,13 +424,16 @@ function spawnShape() {
       const dx = cx - shape.x;
       const dy = cy - shape.y;
       const dist = Math.hypot(dx, dy) || 1;
-      const speed = window.SPEED || 2;
+      const speed = window.SPEED;
       shape.vx = (dx / dist) * speed;
       shape.vy = (dy / dist) * speed;
 
-      Matter.Body.setVelocity(shape.body, { x: shape.vx, y: shape.vy });
+      Matter.Body.setVelocity(shape.body, {
+        x: Math.max(-speed, Math.min(speed, shape.vx)),
+        y: Math.max(-speed, Math.min(speed, shape.vy))
+      });
       shape.body.maxWallBounces = window.maxWallBounces;
-            shape.body.wallBounces = 0;
+      shape.body.wallBounces = 0;
       shape.body.canBounce = true;
       shape.body.svgShape = shape;
 
@@ -432,7 +458,6 @@ function generateShapesWithDelay(count, delay) {
   generateNext();
 }
 
-setInterval(() => globalSeconds++, 1000);
 
 let roundActive = true;
 
@@ -469,17 +494,22 @@ function updateGlyphPosition(glyph) {
 
 Matter.Events.on(engine, 'collisionStart', function (event) {
   const pairs = event.pairs;
+
   pairs.forEach(pair => {
     const bodies = [pair.bodyA, pair.bodyB];
+
     bodies.forEach(body => {
-      if (body.svgShape) {
+      if (body.svgShape && body.svgShape.type === "Glyph") {
         Matter.Body.setVelocity(body, {
           x: -body.velocity.x * 0.8,
           y: -body.velocity.y * 0.8
         });
         Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.1);
       }
+
     });
+
+
   });
 });
 
@@ -495,7 +525,7 @@ function loop(now) {
   if (timeNow - lastRoundTime >= roundTime) {
     round++;
     lastRoundTime = timeNow;
-    generateShapesWithDelay(MAX_SHAPES, 300);
+    generateShapesWithDelay(MAX_SHAPES, 1000);
   }
 
   Engine.update(engine, dt * 1000);
@@ -515,10 +545,9 @@ function loop(now) {
     let vy = s.body.velocity.y;
 
     handleWalls(s.body);
-  if (outOfBounds) {
-    removeShape(s);
-    Matter.World.remove(world, s.body);
-  }
+    if (s.body.outOfBounds) {
+      removeShape(s);
+    }
     s.draw(ctx, pos.x, pos.y, angle);
   }
 

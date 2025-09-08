@@ -1,25 +1,16 @@
-class SvgStar {
+class BaseShape {
   constructor(x, y, opts = {}) {
-    this.id = Math.random().toString(36).slice(2, 10);
-    this.type = "Star";
-    this.name = "Star";
-
+    this.angle = 0;
     this.x = x;
     this.y = y;
-    this.angle = 0;
-    this.angVel = (Math.random() * 2 - 1) * Math.PI / 180;
 
-    this.strokeWidth = opts.strokeWidth || 7;
-    this.fillColor = opts.fillColor || "yellow";
-    this.borderColor = opts.borderColor || "orange";
-    this.restitution = opts.restitution ?? 0.8;
-    this.spikes = opts.spikes || 5;
     this.wallBounces = 0;
-  this.canBounce = true;
-  
+    this.entrySide = opts.entrySide;
+    this.canBounce = true;
 
-    this.buildSVG();
-    this.buildStarColliderOffsets();
+    this.birth = performance.now() / 1000;
+    this.spawnTime = getElapsedMs();
+    this.time = (++idx) * SPAWN_INTERVAL_MS;
 
     const cx = canvas.width / 2;
     const cy = canvas.height / 2;
@@ -28,9 +19,41 @@ class SvgStar {
     const dist = Math.hypot(dx, dy) || 1;
     dx /= dist;
     dy /= dist;
-    const SPEED_FACTOR = window.SPEED || 1;
+
+    const SPEED_FACTOR = window.SPEED || 100;
     this.vx = dx * SPEED_FACTOR;
     this.vy = dy * SPEED_FACTOR;
+  }
+   get ageMs() {
+    return getElapsedMs() - this.spawnTime;
+  }
+    update() {
+    this.x += this.vx;
+    this.y += this.vy;
+  }
+}
+
+
+
+class SvgStar extends BaseShape{
+  constructor(x, y, opts = {}) {
+      super(x, y, opts);
+    this.id = Math.random().toString(36).slice(2, 10);
+    this.type = "Star";
+    this.name = "Star";
+    this.angVel = (Math.random() * 2 - 1) * Math.PI / 180;
+    this.vx = 0;
+    this.vy = 0;
+    this.angularVelocity = 0;
+    this.strokeWidth = opts.strokeWidth || 7;
+    this.fillColor = opts.fillColor || "yellow";
+    this.borderColor = opts.borderColor || "orange";
+    this.restitution = opts.restitution ?? 0.8;
+    this.spikes = opts.spikes || 5;
+     this.bounceMode="realistic";
+
+    this.buildSVG();
+    this.buildStarColliderOffsets();
   }
 
   get size() { return window.shapeSize; }
@@ -139,7 +162,7 @@ class SvgStar {
 
       ctx.fillStyle = "#ffffff";
       ctx.font = "12px Arial";
-      ctx.fillText(`W:${this.body.wallBounces}/${this.body.maxWallBounces}`, -this.radius, this.radius);
+      ctx.fillText(`W:${this.body.wallBounces}/${window.maxWallBounces}`, -this.radius, this.radius - 15);
     }
 
     ctx.restore();
@@ -163,39 +186,24 @@ class SvgStar {
   }
 }
 
-class SvgCircle {
+class SvgCircle extends BaseShape{
   constructor(x, y, opts = {}) {
+        super(x, y, opts);
     this.id = Math.random().toString(36).slice(2, 10);
     this.type = "Circle";
     this.name = "Circle";
-    this.x = x;
-    this.y = y;
-    this.angle = 0;
     this.angVel = (Math.random() * 2 - 1) * Math.PI / 180;
 
     this.strokeWidth = opts.strokeWidth || 7;
     this.fillColor = opts.fillColor || "lightblue";
     this.borderColor = opts.borderColor || "blue";
-    this.restitution = opts.restitution ?? 0.8;
-    this.wallBounces = 0;
+    this.bounceMode="realistic";
 
     this.buildSVG();
     this.buildCircleColliderBase();
     this.buildCircleColliderOffsets();
-
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
-    let dx = cx - this.x;
-    let dy = cy - this.y;
-    const dist = Math.hypot(dx, dy) || 1;
-    dx /= dist;
-    dy /= dist;
-    const SPEED_FACTOR = window.SPEED || 1;
-    this.vx = dx * SPEED_FACTOR;
-    this.vy = dy * SPEED_FACTOR;
   }
-
-  get size() { return window.shapeSize; }
+  get size() { return window.shapeSize >= 100 ? window.shapeSize - 20 : window.shapeSize; }
   get radius() { return this.size / 2; }
 
   buildSVG() {
@@ -277,7 +285,6 @@ class SvgCircle {
     ctx.fill();
     ctx.stroke();
 
-
     if (showColliders) {
       ctx.strokeStyle = "#18ed09";
       ctx.lineWidth = 2;
@@ -303,7 +310,7 @@ class SvgCircle {
 
       ctx.fillStyle = "#ffffff";
       ctx.font = "12px Arial";
-      ctx.fillText(`W:${this.body.wallBounces}/${this.maxWallBounces || 3}`, -this.radius, this.radius);
+      ctx.fillText(`W:${this.body.wallBounces}/${window.maxWallBounces}`, -this.radius, this.radius + 10);
     }
 
 
@@ -324,9 +331,10 @@ class SvgCircle {
   }
 }
 
+class GlyphLetter extends BaseShape{
+  constructor(x, y, char, opts = {})
+   {      super(x, y,char, opts);
 
-class GlyphLetter {
-  constructor(x, y, char, opts = {}) {
     this.char = char.toUpperCase();
     this.x = x;
     this.y = y;
@@ -334,7 +342,7 @@ class GlyphLetter {
     this.fillColor = opts.fillColor || "lightblue";
     this.borderColor = opts.borderColor || "blue";
     this.wallBounces = 0;
-  this.canBounce = true;
+    this.canBounce = true;
 
     const glyph = svgmaker.mkGlyph(this.char, {
       stroke: this.borderColor,
@@ -360,7 +368,7 @@ class GlyphLetter {
     this.buildMatterBody();
     this.body.wallBounces = 0;
     this.body.maxWallBounces = window.maxWallBounces;
-    this.body.canBounce = true; 
+    this.body.canBounce = true;
     this.body.svgShape = this;
   }
 
@@ -425,7 +433,7 @@ class GlyphLetter {
   }
 
   buildGlyphColliderWithBorder() {
-    const borderOffset = this.strokeLocal / 2 + 7;
+    const borderOffset = this.strokeLocal / 2 + 5;
     const scale = this.size / 100;
 
     const mergedPolys = this.mergeAdjacentRects(this.colliderPolys);
@@ -486,7 +494,7 @@ class GlyphLetter {
 
     this.body.svgShape = this;
   }
-  get size() { return window.shapeSize; }
+  get size() { return window.shapeSize >= 100 ? window.shapeSize - 10 : window.shapeSize; }
   get radius() { return this.size / 2; }
 
 
@@ -516,7 +524,7 @@ class GlyphLetter {
 
         ctx.fillStyle = "#ffffff";
         ctx.font = "12px Arial";
-        ctx.fillText(`W:${this.body.wallBounces}/${window.maxWallBounces}`, this.radius, this.radius);
+        ctx.fillText(`W:${this.body.wallBounces}/${window.maxWallBounces}`, -this.radius, this.radius + 2);
 
       });
     }
@@ -536,43 +544,27 @@ class GlyphLetter {
   }
 }
 
-
-class SvgRectangle {
+class SvgRectangle extends BaseShape{
   constructor(x, y, opts = {}) {
+     super(x, y, opts);
     this.id = Math.random().toString(36).slice(2, 10);
     this.type = "Rectangle";
     this.name = "Rectangle";
 
-    this.x = x;
-    this.y = y;
-    this.angle = 0;
     this.angVel = (Math.random() * 2 - 1) * Math.PI / 180;
 
     this.strokeWidth = opts.strokeWidth || 7;
     this.fillColor = opts.fillColor || "lightblue";
     this.borderColor = opts.borderColor || "blue";
-    this.restitution = opts.restitution ?? 0.8;
-    this.wallBounces = window.Bounces;
-
+     this.bounceMode="flat";
     this.width = opts.width || this.size;
     this.height = opts.height || this.size * 0.6;
 
     this.buildSVG();
     this.buildRectCollider();
-
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
-    let dx = cx - this.x;
-    let dy = cy - this.y;
-    const dist = Math.hypot(dx, dy) || 1;
-    dx /= dist;
-    dy /= dist;
-    const SPEED_FACTOR = window.SPEED || 1;
-    this.vx = dx * SPEED_FACTOR;
-    this.vy = dy * SPEED_FACTOR;
   }
 
-  get size() { return window.shapeSize + 40; }
+  get size() { return window.shapeSize + 90; }
   get radius() { return Math.max(this.width, this.height) / 2; }
 
   buildSVG() {
@@ -604,15 +596,32 @@ class SvgRectangle {
 
   buildRectCollider() {
     const scale = 0.57;
-    const w = (this.width / 2) * scale;
-    const h = (this.height / 2) * scale - 2;
+
+    let w = (this.width / 2) * scale;
+    let h = (this.height / 2) * scale - 3;
+    if (this.size > 150) {
+      w = w - 2;
+      h = h - 4;
+    }
+
+
     this.rectColliderBase = [
       { x: -w, y: -h },
       { x: w, y: -h },
       { x: w, y: h },
       { x: -w, y: h }
     ];
+
+    const cx = this.rectColliderBase.reduce((sum, p) => sum + p.x, 0) / this.rectColliderBase.length;
+    const cy = this.rectColliderBase.reduce((sum, p) => sum + p.y, 0) / this.rectColliderBase.length;
+
+    const scaleFactor = 1.3;
+    this.rectColliderScaled = this.rectColliderBase.map(p => ({
+      x: cx + (p.x - cx) * scaleFactor,
+      y: cy + (p.y - cy) * scaleFactor
+    }));
   }
+
 
   getRectColliderWorld() {
     const cos = Math.cos(this.angle);
@@ -665,44 +674,28 @@ class SvgRectangle {
 
       ctx.fillStyle = "#ffffff";
       ctx.font = "12px Arial";
-      ctx.fillText(`W:${this.body.wallBounces}/${this.maxWallBounces || 3}`, -this.radius, this.radius - 35);
+      ctx.fillText(`W:${this.body.wallBounces}/${window.maxWallBounces}`, -this.radius + 20, this.radius - 75);
     }
 
     ctx.restore();
   }
 }
 
-
-class SvgSquare {
+class SvgSquare  extends BaseShape{
   constructor(x, y, opts = {}) {
+     super(x, y, opts);
     this.id = Math.random().toString(36).slice(2, 10);
     this.type = "Square";
     this.name = "Square";
-
-    this.x = x;
-    this.y = y;
-    this.angle = 0;
     this.angVel = (Math.random() * 2 - 1) * Math.PI / 180;
 
     this.strokeWidth = opts.strokeWidth || 7;
     this.fillColor = opts.fillColor || "lightgreen";
     this.borderColor = opts.borderColor || "green";
-    this.restitution = opts.restitution ?? 0.8;
-    this.wallBounces = 0;
-
+     this.bounceMode="flat";
     this.buildSVG();
     this.buildSquareCollider();
 
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
-    let dx = cx - this.x;
-    let dy = cy - this.y;
-    const dist = Math.hypot(dx, dy) || 1;
-    dx /= dist;
-    dy /= dist;
-    const SPEED_FACTOR = window.SPEED || 1;
-    this.vx = dx * SPEED_FACTOR;
-    this.vy = dy * SPEED_FACTOR;
   }
   get size() { return window.shapeSize; }
   get radius() { return this.size / 2; }
@@ -795,7 +788,7 @@ class SvgSquare {
 
       ctx.fillStyle = "#ffffff";
       ctx.font = "12px Arial";
-      ctx.fillText(`W:${this.body.wallBounces}/${this.maxWallBounces || 3}`, -this.radius, this.radius + 25);
+      ctx.fillText(`W:${this.body.wallBounces}/${window.maxWallBounces}`, -this.radius, this.radius + 5);
 
     }
 
@@ -804,43 +797,28 @@ class SvgSquare {
   }
 }
 
-class SvgTriangle {
+class SvgTriangle  extends BaseShape{
   constructor(x, y, opts = {}) {
+     super(x, y, opts);
     this.id = Math.random().toString(36).slice(2, 10);
     this.type = "Triangle";
     this.name = "Triangle";
-
-    this.x = x;
-    this.y = y;
-    this.angle = 0;
-    this.angVel = (Math.random() * 2 - 1) * Math.PI / 180;
-
     this.strokeWidth = opts.strokeWidth || 7;
     this.fillColor = opts.fillColor || "pink";
     this.borderColor = opts.borderColor || "red";
-    this.restitution = opts.restitution ?? 0.8;
-    this.wallBounces = 0;
-
+     this.bounceMode="realistic"; 
     this.buildSVG();
     this.buildCollider();
-
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
-    let dx = cx - this.x;
-    let dy = cy - this.y;
-    const dist = Math.hypot(dx, dy) || 1;
-    dx /= dist;
-    dy /= dist;
-    const SPEED_FACTOR = window.SPEED || 1;
-    this.vx = dx * SPEED_FACTOR;
-    this.vy = dy * SPEED_FACTOR;
   }
-  get size() { return window.shapeSize; }
 
+  get size() { return window.shapeSize; }
   get radius() { return this.size / 2; }
 
   buildSVG() {
-    const svgObj = svgmaker.mkTriangle({
+    const height = Math.sqrt(3) / 2 * 100;
+    const pointsStr = `50,0 0,${height} 100,${height}`;
+
+    const svgObj = svgmaker.mkPolyFromPoints(pointsStr, {
       stroke: this.borderColor,
       fill: this.fillColor,
       outlinePx: this.strokeWidth,
@@ -853,24 +831,31 @@ class SvgTriangle {
     const doc = parser.parseFromString(this.svg, "image/svg+xml");
     const xml = new XMLSerializer().serializeToString(doc.documentElement);
     const svg64 = btoa(xml);
+
     this.img = new Image();
     this.loaded = false;
     this.img.src = "data:image/svg+xml;base64," + svg64;
     this.img.onload = () => { this.loaded = true; };
 
-    this.colliderBase = svgObj.collider.pts.map(p => {
-      const [x, y] = [p.x, p.y];
-      return { x: x - 50, y: y - 50 };
-    });
+    this.vertices = svgObj.collider.pts.map(p => ({ x: p.x, y: p.y }));
   }
 
   buildCollider() {
-    this.colliderScale = this.colliderBase.map(p => ({ x: p.x * 1.3, y: p.y * 1.3 }));
+    const cx = (this.vertices[0].x + this.vertices[1].x + this.vertices[2].x) / 3;
+    const cy = (this.vertices[0].y + this.vertices[1].y + this.vertices[2].y) / 3;
+
+    let scale = this.size < 100 ? 1.19 : 1.1;
+
+    this.colliderBase = this.vertices.map(p => ({
+      x: (p.x - cx) * (this.size / 100) * scale,
+      y: (p.y - cy) * (this.size / 100) * scale
+    }));
   }
 
   getColliderWorld() {
     const cos = Math.cos(this.angle);
     const sin = Math.sin(this.angle);
+
     return this.colliderBase.map(p => ({
       x: this.x + p.x * cos - p.y * sin,
       y: this.y + p.x * sin + p.y * cos
@@ -892,8 +877,8 @@ class SvgTriangle {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.angle);
-    ctx.drawImage(this.img, -this.size / 2, -this.size / 2, this.size, this.size);
-
+    let imgOffsetY = this.size < 100 ? -7 : this.size < 150 && this.size > 100 ? -9 : -12;
+    ctx.drawImage(this.img, -this.size / 2, -this.size / 2 + imgOffsetY, this.size, this.size);
     if (showColliders) {
       ctx.strokeStyle = "#18ed09";
       ctx.lineWidth = 2;
@@ -905,60 +890,41 @@ class SvgTriangle {
       ctx.closePath();
       ctx.stroke();
 
-      ctx.strokeStyle = "#18ed09";
       ctx.lineWidth = 0.6;
+      const scale = 1.2;
       ctx.beginPath();
-      this.colliderScale.forEach((p, i) => {
-        if (i === 0) ctx.moveTo(p.x, p.y);
-        else ctx.lineTo(p.x, p.y);
+      this.colliderBase.forEach((p, i) => {
+        const x = p.x * scale;
+        const y = p.y * scale;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
       });
       ctx.closePath();
       ctx.stroke();
 
       ctx.fillStyle = "#ffffff";
       ctx.font = "12px Arial";
-      ctx.fillText(
-        `W:${this.body.wallBounces}/${this.maxWallBounces || 3}`,
-        -this.radius,
-        this.radius + 25
-      );
+      ctx.fillText(`W:${this.body.wallBounces}/${window.maxWallBounces}`, -this.radius, this.radius);
+
     }
 
     ctx.restore();
   }
 }
 
-
-class SvgOctagon {
+class SvgDiamond  extends BaseShape{
   constructor(x, y, opts = {}) {
+     super(x, y, opts);
     this.id = Math.random().toString(36).slice(2, 10);
     this.type = "Diamond";
     this.name = "Diamond";
-
-    this.x = x;
-    this.y = y;
-    this.angle = 0;
     this.angVel = (Math.random() * 2 - 1) * Math.PI / 180;
 
     this.strokeWidth = opts.strokeWidth || 7;
     this.fillColor = opts.fillColor || "violet";
     this.borderColor = opts.borderColor || "purple";
-    this.restitution = opts.restitution ?? 0.8;
-    this.wallBounces = 0;
-
+     this.bounceMode="flat";
     this.buildSVG();
-    this.buildCollider();
-
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
-    let dx = cx - this.x;
-    let dy = cy - this.y;
-    const dist = Math.hypot(dx, dy) || 1;
-    dx /= dist;
-    dy /= dist;
-    const SPEED_FACTOR = window.SPEED || 1;
-    this.vx = dx * SPEED_FACTOR;
-    this.vy = dy * SPEED_FACTOR;
   }
 
   get size() { return window.shapeSize; }
@@ -973,11 +939,11 @@ class SvgOctagon {
     });
 
     this.svg = svgObj.svg;
-
     const parser = new DOMParser();
     const doc = parser.parseFromString(this.svg, "image/svg+xml");
     const xml = new XMLSerializer().serializeToString(doc.documentElement);
     const svg64 = btoa(xml);
+
     this.img = new Image();
     this.loaded = false;
     this.img.src = "data:image/svg+xml;base64," + svg64;
@@ -986,9 +952,14 @@ class SvgOctagon {
 
   buildCollider() {
     const half = this.size / 2;
-    const scale = 0.95;
-    const adjustedHalf = half * scale;
-    this.colliderBase = [
+
+    let adjustedHalf = half;
+    if (this.size > 150) {
+      adjustedHalf = half - 3;
+    }
+
+
+    return [
       { x: 0, y: -adjustedHalf },
       { x: adjustedHalf, y: 0 },
       { x: 0, y: adjustedHalf },
@@ -996,11 +967,11 @@ class SvgOctagon {
     ];
   }
 
-
   getColliderWorld() {
     const cos = Math.cos(this.angle);
     const sin = Math.sin(this.angle);
-    return this.colliderBase.map(p => ({
+    const local = this.buildCollider();
+    return local.map(p => ({
       x: this.x + p.x * cos - p.y * sin,
       y: this.y + p.x * sin + p.y * cos
     }));
@@ -1024,10 +995,12 @@ class SvgOctagon {
     ctx.drawImage(this.img, -this.size / 2, -this.size / 2, this.size, this.size);
 
     if (showColliders) {
+      const local = this.buildCollider();
+
       ctx.strokeStyle = "#18ed09";
       ctx.lineWidth = 2;
       ctx.beginPath();
-      this.colliderBase.forEach((p, i) => {
+      local.forEach((p, i) => {
         if (i === 0) ctx.moveTo(p.x, p.y);
         else ctx.lineTo(p.x, p.y);
       });
@@ -1038,7 +1011,7 @@ class SvgOctagon {
       ctx.lineWidth = 0.6;
       const scale = 1.3;
       ctx.beginPath();
-      this.colliderBase.forEach((p, i) => {
+      local.forEach((p, i) => {
         const x = p.x * scale;
         const y = p.y * scale;
         if (i === 0) ctx.moveTo(x, y);
@@ -1050,7 +1023,7 @@ class SvgOctagon {
       ctx.fillStyle = "#ffffff";
       ctx.font = "12px Arial";
       ctx.fillText(
-        `W:${this.body.wallBounces}/${this.maxWallBounces || 3}`,
+        `W:${this.body.wallBounces}/${window.maxWallBounces}`,
         -this.radius,
         this.radius - 25
       );
@@ -1060,39 +1033,30 @@ class SvgOctagon {
   }
 }
 
-
-class SvgRegularPolygonShape {
+class SvgRegularPolygonShape  extends BaseShape{
   constructor(x, y, n = 5, opts = {}) {
+     super(x, y, opts);
     this.id = Math.random().toString(36).slice(2, 10);
     this.type = "RegularPolygon";
     this.name = "RegularPolygon";
 
-    this.x = x;
-    this.y = y;
-    this.angle = 0;
     this.angVel = (Math.random() * 2 - 1) * Math.PI / 180;
 
     this.strokeWidth = opts.strokeWidth || 7;
     this.fillColor = opts.fillColor || "#ffffff";
     this.borderColor = opts.borderColor || "#ff0000";
-    this.restitution = opts.restitution ?? 0.8;
-    this.wallBounces = 0;
-    this.n = n;
+    this.bounceMode="realistic";
     this.buildSVG();
     this.buildCollider();
 
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
-    let dx = cx - this.x;
-    let dy = cy - this.y;
-    const dist = Math.hypot(dx, dy) || 1;
-    dx /= dist;
-    dy /= dist;
-    const SPEED_FACTOR = window.SPEED || 1;
-    this.vx = dx * SPEED_FACTOR;
-    this.vy = dy * SPEED_FACTOR;
   }
-  get size() { return window.shapeSize + 70 }
+
+  get size() {
+    return window.shapeSize <= 150 ? window.shapeSize + 70 :
+      window.shapeSize >= 150 ? window.shapeSize + 50 :
+        window.shapeSize >= 180 ? window.shapeSize - 30 : window.shapeSize
+  }
+
 
   get radius() { return this.size / 2; }
   buildSVG() {
@@ -1117,7 +1081,7 @@ class SvgRegularPolygonShape {
 
     this.colliderBase = svgObj.collider.pts.map(p => {
       const [x, y] = p.split(",").map(Number);
-      const scale = this.size / 100 + 0.17;
+      const scale = this.size / 100 + 0.1;
       return { x: (x - 50) * scale, y: (y - 50) * scale };
     });
   }
@@ -1180,9 +1144,9 @@ class SvgRegularPolygonShape {
       ctx.fillStyle = "#ffffff";
       ctx.font = "12px Arial";
       ctx.fillText(
-        `W:${this.body.wallBounces}/${this.maxWallBounces || 3}`,
+        `W:${this.body.wallBounces}/${window.maxWallBounces}`,
         -this.radius,
-        this.radius + 25
+        this.radius - 40
       );
     }
 

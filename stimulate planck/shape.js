@@ -1,7 +1,5 @@
 window.shapeSize = 100;
 
-
-
 class SvgCircle {
   constructor(x, y, opts = {}) {
     this.id = Math.random().toString(36).slice(2, 10);
@@ -20,7 +18,6 @@ class SvgCircle {
     this.entrySide = opts.entrySide;
     this.birth = performance.now() / 1000;
 
-    // سرعت به سمت مرکز
     const cx = canvas.width / 2;
     const cy = canvas.height / 2;
     let dx = cx - this.x;
@@ -32,12 +29,11 @@ class SvgCircle {
     this.vx = dx * SPEED_FACTOR;
     this.vy = dy * SPEED_FACTOR;
 
-    // ساخت SVG
     this.buildSVG();
   }
 
   get size() {
-    return shapeSize;   // همیشه از گلوبال می‌خونه
+    return shapeSize;  
   }
 
   get radius() {
@@ -69,25 +65,20 @@ class SvgCircle {
     ctx.translate(this.x, this.y);
     ctx.rotate(this.angle);
 
-    // رسم SVG
     ctx.drawImage(this.img, -this.radius, -this.radius, this.radius * 2, this.radius * 2);
 
-    // رسم کالیدر بصری
     if (showColliders) {
-      // حلقه اول (مرکز)
       ctx.strokeStyle = "#18ed09";
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
       ctx.stroke();
 
-      // حلقه دوم کمی بزرگتر
       ctx.lineWidth = 1;
       ctx.beginPath();
       ctx.arc(0, 0, this.radius * 1.25, 0, Math.PI * 2);
       ctx.stroke();
 
-      // متن وضعیت
       ctx.fillStyle = "#ffffff";
       ctx.font = "12px Arial";
       ctx.fillText(`W:${this.wallBounces || 0}/${this.maxWallBounces || 3}`, -this.radius, this.radius + 20);
@@ -96,7 +87,6 @@ class SvgCircle {
     ctx.restore();
   }
 
-  // کالیدر واقعی برای Planck.js
   getColliderPoints() {
     return { x: this.x, y: this.y, r: this.radius + this.strokeWidth };
   }
@@ -126,7 +116,6 @@ class SvgLetter {
     const marginX = canvas.width * 0.2;
     const marginY = canvas.height * 0.2;
 
-    // تعیین مختصات اولیه طبق سمت
     if (side === 'left') { this.x = -marginX - Math.random() * 40; this.y = Math.random() * canvas.height; }
     else if (side === 'right') { this.x = canvas.width + marginX + Math.random() * 40; this.y = Math.random() * canvas.height; }
     else if (side === 'top') { this.y = -marginY - Math.random() * 40; this.x = Math.random() * canvas.width; }
@@ -140,13 +129,11 @@ class SvgLetter {
     this.entrySide = side;
     this.loaded = false;
 
-    // Velocity به سمت مرکز
     const cx = canvas.width / 2, cy = canvas.height / 2;
     const dx = cx - this.x, dy = cy - this.y, d = Math.hypot(dx, dy) || 1;
     this.vx = dx / d * speed;
     this.vy = dy / d * speed;
 
-    // تبدیل SVG به Image
     const parser = new DOMParser();
     const doc = parser.parseFromString(svgString, "image/svg+xml");
     const xml = new XMLSerializer().serializeToString(doc.documentElement);
@@ -181,7 +168,6 @@ function randomColor() {
 }
 
 SvgLetter.prototype.getColliderPoints = function () {
-  // ساده‌ترین حالت: مستطیل با width و height
   const hw = this.width / 2;
   const hh = this.height / 2;
   const cos = Math.cos(this.angle);
@@ -214,7 +200,6 @@ class Triangle {
     this.restitution = restitution;
     this.bounceCount = 0;
 
-    // جرم و ممان اینرسی ساده برای مثلث متساوی‌الاضلاع
     this.mass = 1;
     this.invMass = 1 / this.mass;
     this.inertia = (this.mass * this.size * this.size) / 12;
@@ -224,11 +209,10 @@ class Triangle {
   getVertices() {
     const h = (Math.sqrt(3) / 2) * this.size;
     const vertices = [
-      { x: 0, y: -h / 2 },                  // رأس بالا
-      { x: -this.size / 2, y: h / 2 },      // پایین چپ
-      { x: this.size / 2, y: h / 2 }        // پایین راست
+      { x: 0, y: -h / 2 },                  
+      { x: -this.size / 2, y: h / 2 },     
+      { x: this.size / 2, y: h / 2 }        
     ];
-    // دوران بر اساس زاویه
     return vertices.map(v => ({
       x: this.x + v.x * Math.cos(this.angle) - v.y * Math.sin(this.angle),
       y: this.y + v.x * Math.sin(this.angle) + v.y * Math.cos(this.angle)

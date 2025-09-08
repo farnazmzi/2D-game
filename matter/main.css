@@ -1,167 +1,181 @@
  html,
-    body {
-      height: 100%;
-      margin: 0;
-      background: #111;
-      color: #eee;
-      font-family: system-ui, Segoe UI, Arial;
-    }
+ body {
+   height: 100%;
+   margin: 0;
+   background: #111;
+   color: #eee;
+   font-family: system-ui, Segoe UI, Arial;
+ }
 
-    canvas {
-      display: block;
-      width: 100vw;
-      height: 100vh;
-      background: #000;
-    }
+ canvas {
+   display: block;
+   width: 100vw;
+   height: 100vh;
+   background: #000;
+ }
 
-    #hud {
-      position: fixed;
-      left: 12px;
-      top: 12px;
-      z-index: 999;
-      color: #fff;
-      font-size: 16px;
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.801);
-      background: rgba(0, 0, 0, 0.678);
-            padding: 8px 10px;
-      border-radius: 8px;
-    }
-#buttonContainercenter {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  flex-direction: column; 
-  align-items: center;
-  gap: 16px; 
-  z-index: 999;
-}
+ #hud {
+   position: fixed;
+   left: 12px;
+   top: 12px;
+   z-index: 999;
+   color: #fff;
+   font-size: 16px;
+   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.801);
+   background: rgba(0, 0, 0, 0.678);
+   padding: 8px 10px;
+   border-radius: 8px;
+ }
 
-    .control-btn {
-  padding: 16px 32px;
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 18px;
-  font-weight: 600;
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
-  transition: background 0.2s, transform 0.1s;
-  width: 246px;
-    }
+ #buttonContainercenter {
+   position: fixed;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   gap: 16px;
+   z-index: 999;
+ }
 
-    #startGameBtn {
+ .control-btn {
+   padding: 16px 32px;
+   color: #fff;
+   border: none;
+   border-radius: 12px;
+   cursor: pointer;
+   font-size: 18px;
+   font-weight: 600;
+   box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+   transition: background 0.2s, transform 0.1s;
+   width: 246px;
+ }
 
-      background-color: #28a745;
-    }
+ #startGameBtn {
 
-
-    #startGameBtn:hover {
-      background-color: #218838;
-      transform: translateX(-1%) ;
-    }
-    #toggleLive {
-      background-color: #6c757d;
-    }
-
-    #toggleLive:hover {
-      background-color: #5a6268;
-      transform: translateX(1%) ;
-    }
-
-    .btn-container {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      z-index: 1100;
-    }
-
-    #toggleDebug {
-      padding: 12px 18px;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: all 0.2s ease;
-    }
-
-    #toggleDebug {
-      background-color: #007bff;
-    }
-
-    #toggleDebug:hover {
-      background-color: #0069d9;
-      transform: translateY(-2px);
-    }
+   background-color: #28a745;
+ }
 
 
+ #startGameBtn:hover {
+   background-color: #218838;
+   transform: translateX(-1%);
+ }
 
+ #toggleLive {
+   background-color: #6c757d;
+ }
 
-    #controlPanel {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: rgba(34, 34, 34, 0.911);
-      color: #fff;
-      font-family: sans-serif;
-      font-size: 14px;
-      display: none;
-      padding: 20px;
-      border-radius: 10px;
-      width: 320px;
-      text-align: center;
-      z-index: 1000;
-    }
+ #toggleLive:hover {
+   background-color: #5a6268;
+   transform: translateX(1%);
+ }
 
-    .controlRow {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      line-height: 2.3;
-    }
+ .btn-container {
+   position: fixed;
+   bottom: 20px;
+   right: 20px;
+   display: flex;
+   flex-direction: column;
+   gap: 10px;
+   z-index: 1100;
+ }
 
-    .controlRow label {
-      flex: 1;
-      margin-right: 10px;
-      text-align: left;
-    }
+ #toggleDebug {
+   padding: 12px 18px;
+   color: white;
+   border: none;
+   border-radius: 8px;
+   cursor: pointer;
+   font-size: 14px;
+   transition: all 0.2s ease;
+ }
 
-    .controlRow input[type="range"] {
-      flex: 1.8;
-    }
+ #toggleDebug {
+   background-color: #007bff;
+ }
 
-    #controlPanel .close-btn {
-      position: absolute;
-      top: 8px;
-      right: 10px;
-      background: transparent;
-      border: none;
-      font-size: 28px;
-      color: #fff;
-      cursor: pointer;
-    }
+ #debug {
+   position: fixed;
+   right: 12px;
+   top: 12px;
+   background: #222;
+   color: #0f0;
+   padding: 8px;
+   border-radius: 8px;
+   width: 250px;
+   display: none;
+   background: rgba(51, 51, 51, 0.5);
+   overflow: auto;
+ }
 
-    #controlPanel .close-btn:hover {
-      color: #ff4d4d;
-    }
+ #toggleDebug:hover {
+   background-color: #0069d9;
+   transform: translateY(-2px);
+ }
 
-    #toggleCollider {
-      padding: 12px 18px;
-      color: black;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: all 0.2s ease;
-    }
+ #controlPanel {
+   position: fixed;
+   top: 50%;
+   left: 50%;
+   max-height: 40vh;
+   transform: translate(-50%, -50%);
+   background: rgba(34, 34, 34, 0.911);
+   color: #fff;
+   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+   font-size: 14px;
+   display: none;
+   padding: 20px;
+   border-radius: 10px;
+   width: 340px;
+   text-align: center;
+   z-index: 1000;
+ }
 
-    #toggleCollider:hover {
-      background-color: #138496;
-      transform: translateY(-2px);
-    }
+ .controlRow {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   line-height: 2.3;
+ }
+
+ .controlRow label {
+   flex: 1;
+   margin-right: 10px;
+   text-align: left;
+ }
+
+ .controlRow input[type="range"] {
+   flex: 1.8;
+ }
+
+ #controlPanel .close-btn {
+   position: absolute;
+   top: 8px;
+   right: 10px;
+   background: transparent;
+   border: none;
+   font-size: 28px;
+   color: #fff;
+   cursor: pointer;
+ }
+
+ #controlPanel .close-btn:hover {
+   color: #ff4d4d;
+ }
+
+ #toggleCollider {
+   padding: 12px 18px;
+   color: black;
+   border: none;
+   border-radius: 8px;
+   cursor: pointer;
+   font-size: 14px;
+   transition: all 0.2s ease;
+ }
+
+ #toggleCollider:hover {
+   background-color: #138496;
+   transform: translateY(-2px);
+ }

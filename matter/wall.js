@@ -1,7 +1,7 @@
 
 function drawWalls() {
   const thickness = 3;
-  const colors = ['purple', 'green', 'blue', 'lightgray', '#004080', '#f36ddb', 'red'];
+  const colors = ['purple', '#996dffff', 'lightgray', '#004080', '#f36ddb'];
 
   let gradTop = ctx.createLinearGradient(0, 0, canvas.width, 0);
   colors.forEach((c, i) => gradTop.addColorStop(i / (colors.length - 1), c));
@@ -38,9 +38,8 @@ function handleWalls(body) {
   let vx = vel.x, vy = vel.y;
   let hitWall = false;
 
-  const margin = 10;
+  const margin = 32;
 
-  // برخورد با دیوار
   if (!body.hitMaxBounces) {
     if (px - r < margin && vx < 0) { vx = Math.abs(vx); hitWall = true; }
     if (px + r > canvas.width - margin && vx > 0) { vx = -Math.abs(vx); hitWall = true; }
@@ -50,20 +49,22 @@ function handleWalls(body) {
     if (hitWall) {
       Matter.Body.setVelocity(body, { x: vx, y: vy });
       body.wallBounces++;
+  if (body.svgShape) {
+    body.svgShape.wallBounces = body.wallBounces;
+  }
     }
 
     if (body.wallBounces >= body.maxWallBounces) {
-      body.hitMaxBounces = true; // دفعه بعد اجازه میده بره بیرون
+      body.hitMaxBounces = true; 
     }
   }
 
-  // فقط وقتی hitMaxBounces true شد، شی میتونه خارج بشه
-  const marginX = canvas.width * 0.2;
-  const marginY = canvas.height * 0.2;
+  const marginX = canvas.width * 0.22;
+  const marginY = canvas.height * 0.22;
   if (body.hitMaxBounces) {
     if (px < -marginX || px > canvas.width + marginX ||
         py < -marginY || py > canvas.height + marginY) {
-      outOfBounds = true; // فقط همین شی
+      body.outOfBounds = true; 
     }
   }
 }
