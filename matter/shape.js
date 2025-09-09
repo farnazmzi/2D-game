@@ -544,6 +544,7 @@ class GlyphLetter extends BaseShape {
 class SvgRectangle extends BaseShape {
   constructor(x, y, opts = {}) {
     super(x, y, opts);
+
     this.id = Math.random().toString(36).slice(2, 10);
     this.type = "Rectangle";
     this.name = "Rectangle";
@@ -555,47 +556,24 @@ class SvgRectangle extends BaseShape {
     this.borderColor = opts.borderColor || "blue";
     this.bounceMode = "flat";
 
-    this.width = opts.width || this.size;
-    this.height = opts.height || this.size * 0.6;
+    this.width = this.size;
+    this.height = this.size * 0.4;
 
-    this.buildSVG();
     this.buildRectCollider();
   }
 
-  get size() { return window.shapeSize + 60; }
+  get size() { return window.shapeSize; }
   get radius() { return Math.max(this.width, this.height) / 2; }
 
-  buildSVG() {
-    const svgObj = svgmaker.mkRectangle({
-      width: this.width,
-      height: this.height,
-      stroke: this.borderColor,
-      fill: this.fillColor,
-      outlinePx: this.strokeWidth
-    });
-
-    this.svg = svgObj.svg;
-
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(this.svg, "image/svg+xml");
-    const xml = new XMLSerializer().serializeToString(doc.documentElement);
-    const svg64 = btoa(xml);
-
-    this.img = new Image();
-    this.loaded = false;
-    this.img.src = "data:image/svg+xml;base64," + svg64;
-    this.img.onload = () => { this.loaded = true; };
-  }
-
   buildRectCollider() {
-    const halfW = this.width / 2 + 7;
-    const halfH = this.height / 2;
-    const scale = 0.54;
+    const halfW = this.width / 2 + 4;
+    const halfH = this.height / 2 + 4;
+
     this.rectColliderBase = [
-      { x: -halfW * scale, y: -halfH * scale },
-      { x: halfW * scale, y: -halfH * scale },
-      { x: halfW * scale, y: halfH * scale },
-      { x: -halfW * scale, y: halfH * scale }
+      { x: -halfW, y: -halfH },
+      { x: halfW, y: -halfH },
+      { x: halfW, y: halfH },
+      { x: -halfW, y: halfH }
     ];
   }
 
@@ -611,9 +589,21 @@ class SvgRectangle extends BaseShape {
   getColliderPoints() {
     return this.getRectColliderWorld();
   }
+  drawRoundedRect(ctx, x, y, width, height, radius) {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+  }
 
   draw(ctx) {
-    if (!this.loaded) return;
     if (this.body) {
       this.x = this.body.position.x;
       this.y = this.body.position.y;
@@ -624,7 +614,14 @@ class SvgRectangle extends BaseShape {
     ctx.translate(this.x, this.y);
     ctx.rotate(this.angle);
 
-    ctx.drawImage(this.img, -this.width / 2, -this.height / 2, this.width, this.height);
+    ctx.fillStyle = this.fillColor;
+    ctx.strokeStyle = this.borderColor;
+    ctx.lineWidth = this.strokeWidth;
+    ctx.beginPath();
+    const cornerRadius = 2;
+    this.drawRoundedRect(ctx, -this.width / 2, -this.height / 2, this.width, this.height, cornerRadius);
+    ctx.fill();
+    ctx.stroke();
 
     if (showColliders) {
       ctx.strokeStyle = "#18ed09";
@@ -642,18 +639,15 @@ class SvgRectangle extends BaseShape {
       const scale = 1.55;
       ctx.beginPath();
       this.rectColliderBase.forEach((p, i) => {
-        const x = p.x * scale;
+        const x = p.x * (scale - 0.2);
         const y = p.y * scale;
         if (i === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       });
-      ctx.closePath();
-      ctx.stroke();
 
+      ctx.closePath(); ctx.stroke();
       ctx.fillStyle = "#ffffff";
-      ctx.font = "12px Arial";
-      ctx.fillText(`W:${this.body.wallBounces}/${window.maxWallBounces}`, -this.radius + (this.radius / 1.2), this.radius - (this.radius / 2));
-
+      ctx.fillText(`W:${this.body.wallBounces}/${window.maxWallBounces}`, -this.radius + (this.radius / 1.2), this.radius - (this.radius / 3));
     }
 
     ctx.restore();
@@ -780,62 +774,46 @@ class SvgSquare extends BaseShape {
 class SvgTriangle extends BaseShape {
   constructor(x, y, opts = {}) {
     super(x, y, opts);
+
     this.id = Math.random().toString(36).slice(2, 10);
     this.type = "Triangle";
     this.name = "Triangle";
+
     this.strokeWidth = opts.strokeWidth || 7;
     this.fillColor = opts.fillColor || "pink";
     this.borderColor = opts.borderColor || "red";
     this.bounceMode = "realistic";
-    this.buildSVG();
+
+    this.buildShape();
     this.buildCollider();
   }
 
   get size() { return window.shapeSize; }
   get radius() { return this.size / 2; }
 
-  buildSVG() {
-    const height = Math.sqrt(3) / 2 * 100;
-    const pointsStr = `50,0 0,${height} 100,${height}`;
+  buildShape() {
+    const w = this.size;
+    const h = w * Math.sqrt(3) / 2;
+    const offsetY = h / 5;
 
-    const svgObj = svgmaker.mkPolyFromPoints(pointsStr, {
-      stroke: this.borderColor,
-      fill: this.fillColor,
-      outlinePx: this.strokeWidth,
-      size: this.size
-    });
-
-    this.svg = svgObj.svg;
-
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(this.svg, "image/svg+xml");
-    const xml = new XMLSerializer().serializeToString(doc.documentElement);
-    const svg64 = btoa(xml);
-
-    this.img = new Image();
-    this.loaded = false;
-    this.img.src = "data:image/svg+xml;base64," + svg64;
-    this.img.onload = () => { this.loaded = true; };
-
-    this.vertices = svgObj.collider.pts.map(p => ({ x: p.x, y: p.y }));
+    this.vertices = [
+      { x: -w / 2, y: h / 2 - offsetY },
+      { x: w / 2, y: h / 2 - offsetY },
+      { x: 0, y: -h / 2 - offsetY }
+    ];
   }
 
   buildCollider() {
-    const cx = (this.vertices[0].x + this.vertices[1].x + this.vertices[2].x) / 3;
-    const cy = (this.vertices[0].y + this.vertices[1].y + this.vertices[2].y) / 3;
-
-    let scale = this.size < 100 ? 1.19 : 1.1;
-
+    const scale = (this.size + 18) / this.size;
     this.colliderBase = this.vertices.map(p => ({
-      x: (p.x - cx) * (this.size / 100) * scale,
-      y: (p.y - cy) * (this.size / 100) * scale
+      x: p.x * scale,
+      y: p.y * scale
     }));
   }
 
   getColliderWorld() {
     const cos = Math.cos(this.angle);
     const sin = Math.sin(this.angle);
-
     return this.colliderBase.map(p => ({
       x: this.x + p.x * cos - p.y * sin,
       y: this.y + p.x * sin + p.y * cos
@@ -847,7 +825,6 @@ class SvgTriangle extends BaseShape {
   }
 
   draw(ctx) {
-    if (!this.loaded) return;
     if (this.body) {
       this.x = this.body.position.x;
       this.y = this.body.position.y;
@@ -857,21 +834,29 @@ class SvgTriangle extends BaseShape {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.angle);
-    let imgOffsetY = this.size < 100 ? -7 : this.size < 150 && this.size > 100 ? -9 : -12;
-    ctx.drawImage(this.img, -this.size / 2, -this.size / 2 + imgOffsetY, this.size, this.size);
+
+    ctx.fillStyle = this.fillColor;
+    ctx.strokeStyle = this.borderColor;
+    ctx.lineWidth = this.strokeWidth;
+    ctx.beginPath();
+    ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
+    ctx.lineTo(this.vertices[1].x, this.vertices[1].y);
+    ctx.lineTo(this.vertices[2].x, this.vertices[2].y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
     if (showColliders) {
       ctx.strokeStyle = "#18ed09";
       ctx.lineWidth = 2;
       ctx.beginPath();
-      this.colliderBase.forEach((p, i) => {
-        if (i === 0) ctx.moveTo(p.x, p.y);
-        else ctx.lineTo(p.x, p.y);
-      });
+      this.colliderBase.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
       ctx.closePath();
       ctx.stroke();
 
+      ctx.strokeStyle = "#18ed09";
       ctx.lineWidth = 0.6;
-      const scale = 1.45;
+      const scale = 1.4;
       ctx.beginPath();
       this.colliderBase.forEach((p, i) => {
         const x = p.x * scale;
@@ -884,13 +869,17 @@ class SvgTriangle extends BaseShape {
 
       ctx.fillStyle = "#ffffff";
       ctx.font = "12px Arial";
-      ctx.fillText(`W:${this.body.wallBounces}/${window.maxWallBounces}`, -this.radius + (this.radius / 1.5), this.radius - (this.radius / 15));
-
+      ctx.fillText(
+        `W:${this.body.wallBounces}/${window.maxWallBounces}`,
+        -this.radius + (this.radius / 1.5),
+        this.radius - (this.radius / 6)
+      );
     }
 
     ctx.restore();
   }
 }
+
 
 class SvgDiamond extends BaseShape {
   constructor(x, y, opts = {}) {
@@ -1033,7 +1022,7 @@ class SvgRegularPolygonShape extends BaseShape {
 
   get size() {
     return window.shapeSize <= 150 ? window.shapeSize + 70 :
-      window.shapeSize >= 150 ? window.shapeSize + 50 : window.shapeSize
+      window.shapeSize >= 150 ? window.shapeSize + 40 : window.shapeSize
   }
 
 
@@ -1125,7 +1114,7 @@ class SvgRegularPolygonShape extends BaseShape {
       ctx.fillText(
         `W:${this.body.wallBounces}/${window.maxWallBounces}`,
         -this.radius + (this.radius),
-        this.radius - (this.radius / 9)
+        this.radius - (this.radius/10)
       )
     }
 
